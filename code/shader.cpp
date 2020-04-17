@@ -1,9 +1,3 @@
-enum Shaders
-{
-    BASIC_SHADER,
-    LAST_SHADER
-};
-
 enum ShaderType
 {
 	VERTEX,

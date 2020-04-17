@@ -1,9 +1,3 @@
-enum Textures
-{
-    TEST_TEXTURE,
-    LAST_TEXTURE
-};
-
 struct Texture
 {
 	i32 width;
@@ -54,6 +48,3 @@ internal void texture_use(GLenum tex_unit, Texture texture)
 	glActiveTexture(tex_unit);
 	glBindTexture(GL_TEXTURE_2D, texture.id);
 }
-
-
-
