@@ -24,7 +24,27 @@ framebuffer_size_callback(GLFWwindow* window, i32 width, i32 height)
     game_window.height = height;
 
     // TODO(rohan & jun): Do stretching black bar BS
-	glViewport(0, 0, width, height);
+    int horizontal_offset = 0;
+    int vertical_offset = 0;
+    f32 ideal_ratio = 1.7777f;
+    f32 leeway = 0.03f;
+    f32 true_ratio = (f32) width / (f32) height;
+    if (true_ratio > ideal_ratio + leeway)
+    {
+        int ideal_width = ideal_ratio * height;
+        horizontal_offset = (width - ideal_width) / 2;
+    }
+    
+    else if (true_ratio < ideal_ratio - leeway)
+    {
+        int ideal_height = width / ideal_ratio;
+        vertical_offset = (height - ideal_height) / 2;
+    }
+    printf("hori: %d\n",horizontal_offset);
+    printf("verti: %d\n",vertical_offset);
+    game_window.horizontal_offset = horizontal_offset;
+    game_window.vertical_offset = vertical_offset;
+	glViewport(horizontal_offset, vertical_offset, width - 2 * horizontal_offset, height - 2 * vertical_offset);
 }
 
 internal void update_input_state()
