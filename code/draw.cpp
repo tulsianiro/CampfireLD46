@@ -32,7 +32,9 @@ void draw_init()
     init_shader("tex_quad", TEX_QUAD_SHADER);
     
     // TEXTURES
-    stbi_set_flip_vertically_on_load(true);  
+    stbi_set_flip_vertically_on_load(true);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     init_texture("awesomeface.png", TEST_TEXTURE);
     
     glGenVertexArrays(1, &quad_vao);
