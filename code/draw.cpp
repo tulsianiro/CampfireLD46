@@ -1,4 +1,5 @@
 #include "shader.cpp"
+#include "texture.cpp"
 
 hmm_mat4 projection_matrix;
 
