@@ -107,14 +107,6 @@ internal void draw_textured_quad(hmm_v3 pos, int scale, Texture texture)
 }
 
 // ANIMATIONS
-internal Texture get_animation_frame(Animation *animation,
-                                     f32 object_animation_timer)
-{    
-    f32 howfarin = object_animation_timer / animation->time_length;
-    i32 target_frame = (i32)HMM_Lerp(0, howfarin, animation->num_frames);
-    return animation->frames[target_frame];
-}
-
 internal void draw_animated_quad(hmm_v3 pos, int scale, AnimationSM *animation_sm)
 {
     if(animation_sm->playing)

@@ -33,6 +33,14 @@ init_animation_sm(u32 animation_cache_id = LAST_ANIMATION, b32 playing = true,
     return return_sm;
 }
 
+internal Texture get_animation_frame(Animation *animation,
+                                     f32 object_animation_timer)
+{    
+    f32 howfarin = object_animation_timer / animation->time_length;
+    i32 target_frame = (i32)HMM_Lerp(0, howfarin, animation->num_frames);
+    return animation->frames[target_frame];
+}
+
 inline void
 animation_set(AnimationSM *animation_sm, u32 animation_cache_id = LAST_ANIMATION,
               b32 playing = true, b32 looping = false)
