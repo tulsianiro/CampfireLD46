@@ -11,6 +11,12 @@ enum Textures
     LAST_TEXTURE
 };
 
+enum Animations
+{
+    TEST_ANIMATION,
+    LAST_ANIMATION
+};
+
 #include "shader.cpp"
 #include "texture.cpp"
 
@@ -36,6 +42,9 @@ void draw_init()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     init_texture("awesomeface.png", TEST_TEXTURE);
+
+    // ANIMATIONS
+    init_animation("fontanitest", TEST_ANIMATION, 3, 2.0f);
     
     glGenVertexArrays(1, &quad_vao);
     glBindVertexArray(quad_vao);
@@ -72,7 +81,6 @@ void draw_textured_quad(hmm_v3 pos, hmm_v2 half_size, Texture texture)
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
-
 void draw_textured_quad(hmm_v3 pos, int scale, Texture texture)
 {
     hmm_v2 half_size;
@@ -92,5 +100,16 @@ void draw_textured_quad(hmm_v3 pos, int scale, Texture texture)
 
     texture_use(GL_TEXTURE0, texture);    
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+}
+
+void draw_animated_quad(hmm_v3 pos, int scale, Animation animation, f32 *object_animation_timer)
+{
+    while (*object_animation_timer > animation.time_length)
+    {
+        *object_animation_timer -= animation.time_length;
+    }
+    f32 howfarin = *object_animation_timer / animation.time_length;
+    i32 target_frame = (int) lerp(0, animation.num_frames, howfarin);
+    draw_textured_quad(pos, scale, animation.frames[target_frame]);
 }
 

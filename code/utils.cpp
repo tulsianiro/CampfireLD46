@@ -120,3 +120,8 @@ internal bool write_file(const char *path, const char *buf, size_t len)
     fclose(file);
     return n == 1;
 }
+
+internal f32 lerp(f32 start, f32 end, f32 howmuch)
+{
+    return start + (end - start) * howmuch;
+}
