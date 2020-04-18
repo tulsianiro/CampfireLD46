@@ -24,6 +24,7 @@ void simulate_frame(Input *input)
         animation_sm_update(&animation_sm2);
     }
     
-    draw_animated_quad({0.0f, 0.0f, 0.0f}, 1, &animation_sm);
-    draw_animated_quad({50.0f, 50.0f, 50.0f}, 1, &animation_sm2);
+    // draw_animated_quad({0.0f, 0.0f, 0.0f}, 1, &animation_sm);
+    // draw_animated_quad({50.0f, 50.0f, 50.0f}, 1, &animation_sm2);
+    draw_textured_quad({0.0f, 0.0f, 0.0f}, 5, texture_cache[TEST_TEXTURE2]);
 }

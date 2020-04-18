@@ -8,6 +8,7 @@ enum Shaders
 enum Textures
 {
     TEST_TEXTURE,
+    TEST_TEXTURE2,
     LAST_TEXTURE
 };
 
@@ -42,6 +43,7 @@ void draw_init()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     init_texture("awesomeface.png", TEST_TEXTURE);
+    init_texture("0.png", TEST_TEXTURE2);
 
     // ANIMATIONS
     init_animation("fontanitest", TEST_ANIMATION, 3, 2.0f);
