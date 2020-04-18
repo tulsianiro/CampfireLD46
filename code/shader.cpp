@@ -78,7 +78,7 @@ init_shader(const char *shader_name, u32 shader_cache_id)
 	return program;
 }
 
-internal void shader_use(u32 id)
+internal void shader_set(u32 id)
 {
 	glUseProgram(id);
 }

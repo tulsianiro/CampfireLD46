@@ -75,6 +75,7 @@ internal void update_input_state()
         }
 	}
 
+    // TODO(rohan): Mouse position is wrong, use horizontal/vertical black-bar offsets
     glfwGetCursorPos(game_window.window, &input.mouse.mouse_x, &input.mouse.mouse_y);
 	i32 left_mouse_button_state = glfwGetMouseButton(game_window.window, GLFW_MOUSE_BUTTON_LEFT);
 	i32 right_mouse_button_state = glfwGetMouseButton(game_window.window, GLFW_MOUSE_BUTTON_RIGHT);
@@ -156,7 +157,7 @@ int main()
 	}
 
     f64 last_time = glfwGetTime();
-    f32 last_dt = 0.01666f;
+    dt = 0.01666f;
 
     glfwSwapInterval(1);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -167,12 +168,12 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
 
         update_input_state();
-        simulate_frame(&input, last_dt);
+        simulate_frame(&input);
         
         glfwSwapBuffers(game_window.window);
         
         f64 now_time = glfwGetTime();
-        last_dt = (f32)(now_time - last_time);
+        dt = (f32)(now_time - last_time);
         last_time = now_time;
     }
     

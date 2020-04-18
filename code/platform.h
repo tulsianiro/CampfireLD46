@@ -1,5 +1,7 @@
 #if !defined(PLATFORM_H)
 
+global f32 dt;
+
 enum 
 {
     KEY_SPACE               = GLFW_KEY_SPACE,
