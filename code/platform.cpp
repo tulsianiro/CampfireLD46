@@ -80,6 +80,14 @@ internal void update_input_state()
 
     // TODO(rohan): Mouse position is wrong, use horizontal/vertical black-bar offsets
     glfwGetCursorPos(game_window.window, &input.mouse.mouse_x, &input.mouse.mouse_y);
+    input.mouse.mouse_x = HMM_Clamp(0, input.mouse.mouse_x, game_window.width);
+    input.mouse.mouse_y = HMM_Clamp(0, input.mouse.mouse_y, game_window.height);
+    f32 ndc_x = (f32)input.mouse.mouse_x / (f32)game_window.width;
+    f32 ndc_y = (f32)input.mouse.mouse_y / (f32)game_window.height;
+    input.mouse.mouse_x = (i32)(ndc_x * (f32)game_window.base_width) - (game_window.base_width / 2);
+    input.mouse.mouse_y = (i32)(ndc_y * (f32)game_window.base_height) - (game_window.base_height / 2);
+    input.mouse.mouse_y *= -1;
+
 	i32 left_mouse_button_state = glfwGetMouseButton(game_window.window, GLFW_MOUSE_BUTTON_LEFT);
 	i32 right_mouse_button_state = glfwGetMouseButton(game_window.window, GLFW_MOUSE_BUTTON_RIGHT);
 
