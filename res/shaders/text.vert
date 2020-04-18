@@ -28,6 +28,5 @@ void main()
     uv += source.xy;
     
     frag_uv = uv;
-	float scale = 1;
-    gl_Position = vec4(position.xyz * scale, position.w);
+    gl_Position = vec4(position.xyz, position.w);
 }

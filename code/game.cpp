@@ -37,4 +37,8 @@ void simulate_frame(Input *input)
     {
         draw_quad({-100, -100, 0}, {50, 50}, {0.0, 0.4, 0.8});
     }
+
+    char buf[128];
+    sprintf_s(buf, 128, "FPS:%d", (int)(1/dt));
+    RenderText(&font_cache[DEFAULT_FONT], {1, 0, 0, 1}, {25.0f, 25.0f}, buf);
 }
