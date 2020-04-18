@@ -1,3 +1,5 @@
+#include <xaudio2.h>
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -14,6 +16,7 @@
 
 #include "utils.cpp"
 #include "platform.h"
+#include "audio.cpp"
 #include "draw.cpp"
 #include "game.cpp"
 
@@ -162,6 +165,7 @@ int main()
     glfwSwapInterval(1);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     draw_init();
+    audio_init();
     
     while(!glfwWindowShouldClose(game_window.window))
     {

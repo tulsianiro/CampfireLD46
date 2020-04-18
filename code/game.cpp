@@ -7,6 +7,7 @@ void init_game()
 {
      animation_sm = init_animation_sm(TEST_ANIMATION, true, true);
      animation_sm2 = init_animation_sm(TEST_ANIMATION, true, false);
+     play_sound(TEST_AUDIO);
 }
 
 void simulate_frame(Input *input)
