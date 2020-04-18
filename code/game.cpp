@@ -22,21 +22,27 @@ void simulate_frame(Input *input)
         animation_sm_update(&animation_sm);
     }
 
-    hmm_v3 pos1 = {0.0f, 0.0f, 0.0f};
-    hmm_v3 pos2 = {(f32)input->mouse.mouse_x, (f32)input->mouse.mouse_y, 0.0f};
+    draw_animated_quad({0.0f, 0.0f, 0.0f}, 3, &animation_sm);
     
-    AABB aabb1 = init_aabb_from_anim({pos1.X, pos1.Y}, &animation_sm);
-    AABB aabb2 = init_aabb_from_texture({pos2.X, pos2.Y}, TEST_TEXTURE2);
+    // hmm_v3 pos1 = {0.0f, 0.0f, 0.0f};
+    // hmm_v3 pos2 = {(f32)input->mouse.mouse_x, (f32)input->mouse.mouse_y, 0.0f};
+    
+    // AABB aabb1 = init_aabb_from_anim({pos1.X, pos1.Y}, &animation_sm);
+    // AABB aabb2 = init_aabb_from_texture({pos2.X, pos2.Y}, TEST_TEXTURE2);
 
-    draw_quad({aabb1.pos.X, aabb1.pos.Y, 0}, aabb1.half_dim, {0.8, 0.5, 0.6});
-    draw_quad({aabb2.pos.X, aabb2.pos.Y, 0}, aabb2.half_dim, {0.8, 0.5, 0.6});
-    draw_animated_quad(pos1, 1, &animation_sm);
-    draw_textured_quad(pos2, 1, texture_cache[TEST_TEXTURE2]);
-
-    if(aabb_vs_aabb(aabb1, aabb2))
-    {
-        draw_quad({-100, -100, 0}, {50, 50}, {0.0, 0.4, 0.8});
-    }
+    // draw_quad({aabb1.pos.X, aabb1.pos.Y, 0}, aabb1.half_dim, {0.8, 0.5, 0.6});
+    // draw_quad({pos2.X, pos2.Y, 0},
+    //           {(f32)(texture_cache[TEST_TEXTURE2].width / 2.0f),
+    //            (f32)(texture_cache[TEST_TEXTURE2].height / 2.0f)},
+    //           {0.8, 0.5, 0.6});
+    
+    // draw_animated_quad(pos1, 1, &animation_sm);
+    // draw_textured_quad(pos2, 1, texture_cache[TEST_TEXTURE2]);
+  
+    // if(aabb_vs_aabb(aabb1, aabb2))
+    // {
+    //     draw_quad({-100, -100, 0}, {50, 50}, {0.0, 0.4, 0.8});
+    // }
 
     char buf[128];
     sprintf_s(buf, 128, "FPS:%d", (int)(1/dt));

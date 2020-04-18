@@ -2,6 +2,7 @@ enum Shaders
 {
     QUAD_SHADER,
     TEX_QUAD_SHADER,
+    ANIM_QUAD_SHADER,
     TEXT_SHADER,
     LAST_SHADER
 };
@@ -47,6 +48,7 @@ void draw_init()
     // SHADER
     init_shader("quad", QUAD_SHADER);
     init_shader("tex_quad", TEX_QUAD_SHADER);
+    init_shader("anim_quad", ANIM_QUAD_SHADER);
 	init_shader("text", TEXT_SHADER);
     
     // TEXTURES
@@ -57,7 +59,7 @@ void draw_init()
     init_texture("0.png", TEST_TEXTURE2);
 
     // ANIMATIONS
-    init_animation("fontanitest", TEST_ANIMATION, 3, 2.0f);
+    init_animation("player.png", TEST_ANIMATION, 16, 21, {32.0f, 32.0f}, .7f);
 
     // FONTS
     LoadFont("Inconsolata", DEFAULT_FONT);
@@ -138,9 +140,35 @@ internal void draw_animated_quad(hmm_v3 pos, int scale, AnimationSM *animation_s
     if(animation_sm->playing)
     {
         Animation *animation = &animation_cache[animation_sm->animation_id];
+        Texture *texture = &animation->texture_atlas;
+        
         f32 object_animation_timer = animation_sm->animation_timer;
-        Texture texture = get_animation_frame(animation, object_animation_timer);
-        draw_textured_quad(pos, scale, texture);
+        i32 anim_index = get_animation_frame(animation, object_animation_timer);
+        i32 rows = texture->rows;
+        i32 cols = texture->cols;
+        f32 grid_x = (f32)(anim_index % cols);
+        f32 grid_y = (f32)(HMM_Clamp(0, (anim_index - 1) / cols, ((anim_index - 1) / cols) + 1));
+        
+        shader_set(shader_cache[ANIM_QUAD_SHADER]);
+        pos.X += (game_window.base_width / 2);
+        pos.Y += (game_window.base_height / 2);
+
+        hmm_v2 half_size = {(f32)(scale * texture->grid_width / 2),
+                            (f32)(scale * texture->grid_height / 2)};
+        hmm_vec2 uv_offset = {(f32)(grid_x * texture->grid_width / texture->width),
+                              (f32)(grid_y * texture->grid_height / texture->height)};
+        hmm_vec2 atlas_dim = {(f32)cols, (f32)rows};
+        
+        uniform_set_vec3(shader_cache[ANIM_QUAD_SHADER], "quad_pos", pos);
+        uniform_set_vec2(shader_cache[ANIM_QUAD_SHADER], "quad_half_size", half_size);
+        uniform_set_mat4(shader_cache[ANIM_QUAD_SHADER], "projection_matrix",
+                         projection_matrix);
+        uniform_set_vec2(shader_cache[ANIM_QUAD_SHADER], "uv_offset", uv_offset);
+        uniform_set_vec2(shader_cache[ANIM_QUAD_SHADER], "atlas_dim", atlas_dim);
+        
+        texture_set(GL_TEXTURE0, *texture);    
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+       
     }
 }
 

@@ -3,7 +3,9 @@ struct Animation
 {
     i32 num_frames;
     f32 time_length;
-    Texture frames[MAX_FRAMES];
+    Texture texture_atlas;
+    u32 anim_begin_index;
+    u32 anim_end_index;
 };
 
 global Animation animation_cache[LAST_ANIMATION];
@@ -33,12 +35,12 @@ init_animation_sm(u32 animation_cache_id = LAST_ANIMATION, b32 playing = true,
     return return_sm;
 }
 
-internal Texture get_animation_frame(Animation *animation,
+internal u32 get_animation_frame(Animation *animation,
                                      f32 object_animation_timer)
 {    
     f32 howfarin = object_animation_timer / animation->time_length;
     i32 target_frame = (i32)HMM_Lerp(0, howfarin, animation->num_frames);
-    return animation->frames[target_frame];
+    return target_frame + animation->anim_begin_index;
 }
 
 inline void
@@ -80,12 +82,14 @@ animation_sm_update(AnimationSM *animation_sm)
 }
 
 internal void init_animation(const char *animation_name, uint32 animation_cache_id,
-                             i32 num_frames, f32 time_length)
+                             i32 start_index, i32 end_index, hmm_v2 grid_dim, f32 time_length)
 {
     Animation animation;
-    animation.num_frames = num_frames;
+    animation.num_frames = (end_index - start_index) + 1;
     animation.time_length = time_length;
-    for (int i = 0; i < num_frames; i++)
+    animation.anim_begin_index = start_index;
+    animation.anim_end_index = end_index;
+    for (int i = 0; i < animation.num_frames; i++)
     {
         Texture texture;
         glGenTextures(1, &texture.id);
@@ -97,7 +101,7 @@ internal void init_animation(const char *animation_name, uint32 animation_cache_
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
         char image_path[128];
-        sprintf_s(image_path, "../res/textures/%s/%d.png", animation_name, i);
+        sprintf_s(image_path, "../res/textures/%s", animation_name, i);
         unsigned char *data = stbi_load(image_path, &texture.width, &texture.height,
                                         &texture.channels, 0);
         if (data)
@@ -110,6 +114,12 @@ internal void init_animation(const char *animation_name, uint32 animation_cache_
             {
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.width, texture.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
             }
+
+            texture.is_atlas = true;
+            texture.rows = texture.height / grid_dim.Y;
+            texture.cols = texture.width / grid_dim.X;
+            texture.grid_width = grid_dim.X;
+            texture.grid_height = grid_dim.Y;
         }
         else
         {
@@ -117,7 +127,7 @@ internal void init_animation(const char *animation_name, uint32 animation_cache_
         }
         
         stbi_image_free(data);
-        animation.frames[i] = texture;
+        animation.texture_atlas = texture;
     }
 
     animation_cache[animation_cache_id] = animation;

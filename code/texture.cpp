@@ -4,13 +4,20 @@ struct Texture
 	i32 height;
 	i32 channels;
 	u32 id;
+    b32 is_atlas;
+    i32 rows;
+    i32 cols;
+    i32 grid_width;
+    i32 grid_height;
 };
 
 global Texture texture_cache[LAST_TEXTURE];
 
-internal uint32 init_texture(const char *image_name, uint32 texture_cache_id)
+internal uint32 init_texture(const char *image_name, uint32 texture_cache_id,
+                             u32 grid_width = -1, u32 grid_height = -1)
 {
 	Texture texture;
+    
 	glGenTextures(1, &texture.id);
 	glBindTexture(GL_TEXTURE_2D, texture.id);
 
@@ -32,6 +39,15 @@ internal uint32 init_texture(const char *image_name, uint32 texture_cache_id)
 		{
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.width, texture.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		}
+
+        if(grid_width != -1 && grid_height != -1)
+        {
+            texture.is_atlas = true;
+            texture.rows = texture.width / grid_width;
+            texture.cols = texture.height / grid_height;
+            texture.grid_width = grid_width;
+            texture.grid_height = grid_height;
+        }
 	}
 	else
 	{
