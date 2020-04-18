@@ -8,11 +8,12 @@ struct Texture
 
 global Texture texture_cache[LAST_TEXTURE];
 
+#define MAX_FRAMES 16
 struct Animation
 {
     i32 num_frames;
     f32 time_length;
-    Texture frames[16];
+    Texture frames[MAX_FRAMES];
 };
 
 global Animation animation_cache[LAST_ANIMATION];

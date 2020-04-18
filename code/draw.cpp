@@ -17,8 +17,26 @@ enum Animations
     LAST_ANIMATION
 };
 
+enum DrawTypes
+{
+    ANIMATED,
+    STATIC
+};
+
 #include "shader.cpp"
 #include "texture.cpp"
+
+#define MAX_DRAW_JOBS 64
+struct DrawJob
+{
+    int draw_type;
+    hmm_v3 pos;
+    int scale;
+    Texture texture;
+};
+
+global DrawJob draw_queue[MAX_DRAW_JOBS];
+global int num_draw_jobs = 0;
 
 hmm_mat4 projection_matrix;
 
@@ -102,7 +120,7 @@ void draw_textured_quad(hmm_v3 pos, int scale, Texture texture)
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
-void draw_animated_quad(hmm_v3 pos, int scale, Animation animation, f32 *object_animation_timer)
+Texture get_animation_frame(Animation animation, f32 *object_animation_timer)
 {
     while (*object_animation_timer > animation.time_length)
     {
@@ -110,6 +128,15 @@ void draw_animated_quad(hmm_v3 pos, int scale, Animation animation, f32 *object_
     }
     f32 howfarin = *object_animation_timer / animation.time_length;
     i32 target_frame = (int) lerp(0, animation.num_frames, howfarin);
-    draw_textured_quad(pos, scale, animation.frames[target_frame]);
+    return animation.frames[target_frame];
+}
+
+// NOTE: mostly for development
+// in the actual game we probably want to use get_animation_frame to get the Texture in object update
+// then pass that to a DrawJob -> draw queue 
+void draw_animated_quad(hmm_v3 pos, int scale, Animation animation, f32 *object_animation_timer)
+{
+    Texture texture = get_animation_frame(animation, object_animation_timer);
+    draw_textured_quad(pos, scale, texture);
 }
 
