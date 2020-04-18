@@ -59,7 +59,7 @@ void draw_init()
     init_texture("0.png", TEST_TEXTURE2);
 
     // ANIMATIONS
-    init_animation("player.png", TEST_ANIMATION, 16, 21, {32.0f, 32.0f}, .7f);
+    init_animation("player.png", TEST_ANIMATION, 16, 20, {32.0f, 32.0f}, .7f);
 
     // FONTS
     LoadFont("Inconsolata", DEFAULT_FONT);
@@ -147,8 +147,7 @@ internal void draw_animated_quad(hmm_v3 pos, int scale, AnimationSM *animation_s
         i32 rows = texture->rows;
         i32 cols = texture->cols;
         f32 grid_x = (f32)(anim_index % cols);
-        f32 grid_y = (f32)(HMM_Clamp(0, (anim_index - 1) / cols, ((anim_index - 1) / cols) + 1));
-        
+        f32 grid_y = (f32)(anim_index / cols);
         shader_set(shader_cache[ANIM_QUAD_SHADER]);
         pos.X += (game_window.base_width / 2);
         pos.Y += (game_window.base_height / 2);
