@@ -68,7 +68,7 @@ void draw_init()
     // TILEMAP
 #define TILE_WIDTH 16
 #define TILE_HEIGHT 16
-    init_tilemap("dummy", "tileset.png", TILE_WIDTH, TILE_HEIGHT);
+    init_tilemap("levelfile.txt", "tileset.png", TILE_WIDTH, TILE_HEIGHT);
     
     glGenVertexArrays(1, &quad_vao);
     glBindVertexArray(quad_vao);

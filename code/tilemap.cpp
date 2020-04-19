@@ -3,6 +3,7 @@
 struct Tilemap
 {
     char tiles[MAX_TILES_IN_MAP];
+    int num_tiles;
     Texture tileset;
     int map_width; // in tiles
     int map_height;
@@ -48,8 +49,34 @@ internal void init_tilemap(const char *map_filename, const char *tilemap_filenam
 	}
 	stbi_image_free(data);
 
-    // TODO(jun): read map from file
+    // read map from file
     // NOTE(jun): THIS MUST BE READ BOTTOM UP (bottom left 0,0), IN ROWS
-    tilemap.map_width = 10; // TODO(jun): infer these from text file
-    tilemap.map_height = 10;
+    // NOTE(jun): using stdio for now and you can't stop me
+    #include <stdio.h>
+ 
+    FILE *fp;
+    char map_path[128];
+	sprintf_s(map_path, "../res/%s", map_filename);
+    fp = fopen(map_path, "r");
+    char str[MAX_TILES_IN_MAP];
+
+    // read width and height
+    fgets(str, 5, fp);
+    tilemap.map_width = strtoi(str);
+    fgets(str, 5, fp);
+    tilemap.map_height = strtoi(str);
+    tilemap.num_tiles = tilemap.map_width * tilemap.map_height;
+    int map_size_1d = tilemap.num_tiles;
+    // read line by line, placing in tilemap backwards
+    for (int i = 0 ; i < tilemap.map_height; i++)
+    {
+        fgets(str, MAX_TILES_IN_MAP, fp);
+        int index = 0;
+        map_size_1d -= tilemap.map_width;
+        for(int j = map_size_1d; j < map_size_1d + tilemap.map_width; j++)
+        {
+            tilemap.tiles[j] = str[index++];
+        }
+    }
+    fclose(fp);
 }

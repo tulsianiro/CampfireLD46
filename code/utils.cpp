@@ -125,3 +125,16 @@ internal f32 lerp(f32 start, f32 end, f32 howmuch)
 {
     return start + (end - start) * howmuch;
 }
+
+internal int strtoi(char *a)
+{
+    int return_value = 0;
+    int index = 0;
+    while(a[index] != '\0' && a[index] != '\n')
+    {
+        return_value *= 10;
+        return_value += (int)(a[index]-'0');
+        index++;
+    }
+    return return_value;
+}
