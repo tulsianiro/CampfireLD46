@@ -24,6 +24,7 @@ enum Animations
 #include "texture.cpp"
 #include "animation.cpp"
 #include "text.cpp"
+#include "tilemap.cpp"
 
 global hmm_mat4 projection_matrix;
 global u32 quad_vao;
@@ -63,6 +64,11 @@ void draw_init()
 
     // FONTS
     LoadFont("Inconsolata", DEFAULT_FONT);
+
+    // TILEMAP
+#define TILE_WIDTH 16
+#define TILE_HEIGHT 16
+    init_tilemap("dummy", "tileset.png", TILE_WIDTH, TILE_HEIGHT);
     
     glGenVertexArrays(1, &quad_vao);
     glBindVertexArray(quad_vao);
@@ -72,7 +78,7 @@ void draw_init()
 internal void draw_quad(hmm_v3 pos, hmm_v2 half_size, hmm_vec3 color)
 {
     if(blend_mode == FONT_BLEND)
-    {
+   {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         blend_mode = QUAD_BLEND;
     }
@@ -126,6 +132,25 @@ internal void draw_textured_quad(hmm_v3 pos, int scale, Texture texture)
     half_size.Y = (texture.height / 2) * scale; 
 
     draw_textured_quad(pos, half_size, texture);
+}
+
+internal void draw_map()
+{
+    int x = -game_window.base_width / 2;
+    int y = -game_window.base_height / 2;
+    int reader = 0;
+    for(int i = 0; i < tilemap.map_width; i++)
+    {
+        for(int j = 0; j < tilemap.map_height; j++)
+        {
+            int texture_code = tilemap.tiles[reader++];
+            // NOTE(jun): not sure why these have to be f32, but keeping it for consistency
+            // with animated quad code (seamless passing to hmm_vec2?)
+            f32 u = (f32)i / tilemap.map_width;
+            f32 v = (f32)j / tilemap.map_height;
+            // TODO(jun): texture indexing, shader, similar to animated quad code
+        }
+    }
 }
 
 // ANIMATIONS

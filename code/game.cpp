@@ -17,13 +17,15 @@ void simulate_frame(Input *input)
         game_initialized = true;
     }
 
+    draw_map();
+    
     // TODO(rohan): Game Object Updates
     {
         animation_sm_update(&animation_sm);
     }
 
     draw_animated_quad({0.0f, 0.0f, 0.0f}, 3, &animation_sm);
-    
+
     // hmm_v3 pos1 = {0.0f, 0.0f, 0.0f};
     // hmm_v3 pos2 = {(f32)input->mouse.mouse_x, (f32)input->mouse.mouse_y, 0.0f};
     
