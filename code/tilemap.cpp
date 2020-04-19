@@ -5,12 +5,17 @@ struct Tilemap
     char tiles[MAX_TILES_IN_MAP];
     int num_tiles;
     Texture texture;
+    int grid_width;
+    int grid_height;
 };
 
 global Tilemap tilemap;
 
 internal void init_tilemap(const char *tilemap_filename, int grid_width, int grid_height)
 {
+    tilemap.grid_width = grid_width;
+    tilemap.grid_height = grid_height;
+    
     // read texture
 	glGenTextures(1, &tilemap.texture.id);
 	glBindTexture(GL_TEXTURE_2D, tilemap.texture.id);

@@ -14,17 +14,41 @@ void simulate_frame(Input *input)
     if(!game_initialized)
     {
         init_game();
+        init_camera(0, 100);
         game_initialized = true;
     }
 
-    draw_tilemapped_quad({100.0f, 100.0f, 0.0f}, 3, 2);
-    
-    // TODO(rohan): Game Object Updates
+    if (key_is_down(KEY_LEFT))
+    {
+        camera.x -= 5;
+    }
+    if (key_is_down(KEY_RIGHT))
+    {
+        camera.x += 5;
+    }
+        if (key_is_down(KEY_DOWN))
+    {
+        camera.y -= 5;
+    }
+    if (key_is_down(KEY_UP))
+    {
+        camera.y += 5;
+    }
+
+    for(int i = 0; i < 10000; i++)
+    {
+        hmm_vec3 tilemapped_pos = {100.0f, 100.0f, 0.0f};
+        tilemapped_pos = world_to_screen(tilemapped_pos);
+        draw_tilemapped_quad(tilemapped_pos, 3, 2);
+    }
+        // TODO(rohan): Game Object Updates
     {
         animation_sm_update(&animation_sm);
     }
 
-    draw_animated_quad({0.0f, 0.0f, 0.0f}, 3, &animation_sm);
+    hmm_vec3 animated_pos = {0.0f, 0.0f, 0.0f};
+    animated_pos = world_to_screen(animated_pos);
+    draw_animated_quad(animated_pos, 3, &animation_sm);
 
     // hmm_v3 pos1 = {0.0f, 0.0f, 0.0f};
     // hmm_v3 pos2 = {(f32)input->mouse.mouse_x, (f32)input->mouse.mouse_y, 0.0f};

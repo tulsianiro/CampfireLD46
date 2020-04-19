@@ -26,6 +26,7 @@ enum Animations
 #include "text.cpp"
 #include "tilemap.cpp"
 
+
 global hmm_mat4 projection_matrix;
 global u32 quad_vao;
 
@@ -36,6 +37,28 @@ enum Blend
 };
 
 global u32 blend_mode;
+
+struct Camera
+{
+    int x;
+    int y;
+};
+global Camera camera;
+
+internal void init_camera(int x, int y)
+{
+    camera.x = x;
+    camera.y = y;
+    //TODO(jun): think about real camera initialization
+}
+
+inline hmm_vec3 world_to_screen(hmm_vec3 pos)
+{
+    hmm_vec3 toret = pos;
+    toret.X -= camera.x;
+    toret.Y -= camera.y;
+    return toret;
+}
 
 void draw_init()
 {
@@ -119,8 +142,38 @@ internal void draw_textured_quad(hmm_v3 pos, hmm_v2 half_size, Texture texture)
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
+// CHECK IF ON SCREEN (only supports textured draws with scale because im lazy)
+internal b32 on_screen(hmm_v3 pos, int scale, Texture texture, b32 tilemapped = false)
+{
+    int texture_width;
+    int texture_height;
+    if (tilemapped)
+    {
+        texture_width = tilemap.grid_width;
+        texture_height = tilemap.grid_height;
+    }
+    else
+    {
+        texture_width = texture.width;
+        texture_height = texture.height;
+    }
+    int horizontal_limit = (game_window.base_width + texture_width * scale) / 2;
+    int vertical_limit = (game_window.base_height + texture_height * scale) / 2;
+    if (pos.X < camera.x - horizontal_limit || pos.X > camera.x + horizontal_limit || pos.Y < camera.y - vertical_limit || pos.Y > camera.y + vertical_limit)
+    {
+        return 0;
+    }
+    return 1;
+}
+
+// BAISC (STATIC) TEXTURED QUAD
 internal void draw_textured_quad(hmm_v3 pos, int scale, Texture texture)
 {
+    if (!on_screen(pos, scale, texture))
+    {
+        return;
+    }
+        
     if(blend_mode == FONT_BLEND)
     {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -134,9 +187,15 @@ internal void draw_textured_quad(hmm_v3 pos, int scale, Texture texture)
     draw_textured_quad(pos, half_size, texture);
 }
 
+// TILEMAPPED QUADS
 internal void draw_tilemapped_quad(hmm_v3 pos, int scale, int tile_index)
 {
-     if(blend_mode == FONT_BLEND)
+    Texture dummy = {};
+    if (!on_screen(pos, scale, dummy, true))
+    {
+        return;
+    }
+    if(blend_mode == FONT_BLEND)
     {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         blend_mode = QUAD_BLEND;
@@ -184,7 +243,10 @@ internal void draw_animated_quad(hmm_v3 pos, int scale, AnimationSM *animation_s
     {
         Animation *animation = &animation_cache[animation_sm->animation_id];
         Texture *texture = &animation->texture_atlas;
-        
+        if (!on_screen(pos, scale, *texture))
+        {
+            return;
+        }
         f32 object_animation_timer = animation_sm->animation_timer;
         i32 anim_index = get_animation_frame(animation, object_animation_timer);
         i32 rows = texture->rows;
