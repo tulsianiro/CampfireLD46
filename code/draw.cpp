@@ -298,13 +298,16 @@ internal void draw_animated_quad(hmm_v3 pos, int scale, AnimationSM *animation_s
 }
 
 internal void RenderText(Font *font, hmm_vec4 color, hmm_vec2 position, const char *text)
-{
+{    
     if(blend_mode == QUAD_BLEND)
     {
+        glViewport(0, 0, game_window.width, game_window.height);
         glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
         blend_mode = FONT_BLEND;
     }
 
+    position.X *= game_window.width;
+    position.Y *= game_window.height;
     
     GLuint shader = shader_cache[TEXT_SHADER];
     glUseProgram(shader);
@@ -340,4 +343,6 @@ internal void RenderText(Font *font, hmm_vec4 color, hmm_vec2 position, const ch
         
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }
+
+    glViewport(game_window.horizontal_offset, game_window.vertical_offset, game_window.width - 2 * game_window.horizontal_offset, game_window.height - 2 * game_window.vertical_offset);
 }
