@@ -183,7 +183,16 @@ InitSound(char *FileName, u32 audio_cache_id, bool Loop)
     audio.Buffer = buffer;
     audio_cache[audio_cache_id] = audio;
 }
-    
+
+// 0.0f is no volume, 1.0f is full volume
+void change_volume(u32 audio_cache_id, f32 volume)
+{
+    win32_audio audio = audio_cache[audio_cache_id];
+    IXAudio2SourceVoice *source_voice = audio.SourceVoice;
+    source_voice->SetVolume(volume);
+}
+
+
 void play_sound(u32 audio_cache_id)
 {
     win32_audio audio = audio_cache[audio_cache_id];
