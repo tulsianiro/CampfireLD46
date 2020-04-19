@@ -97,29 +97,6 @@ void draw_init()
     glBindVertexArray(quad_vao);
 }
 
-// QUAD
-internal void draw_quad(hmm_v3 pos, hmm_v2 half_size, hmm_vec3 color)
-{
-    if(blend_mode == FONT_BLEND)
-   {
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        blend_mode = QUAD_BLEND;
-    }
-    
-    shader_set(shader_cache[QUAD_SHADER]);
-
-    pos.X += (game_window.base_width / 2);
-    pos.Y += (game_window.base_height / 2);
-
-    uniform_set_vec3(shader_cache[QUAD_SHADER], "quad_color", color);
-    uniform_set_vec3(shader_cache[QUAD_SHADER], "quad_pos", pos);
-    uniform_set_vec2(shader_cache[QUAD_SHADER], "quad_half_size", half_size);
-    uniform_set_mat4(shader_cache[QUAD_SHADER], "projection_matrix",
-                     projection_matrix);
-    
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-}
-
 // TEXTURES
 internal void draw_textured_quad(hmm_v3 pos, hmm_v2 half_size, Texture texture)
 {
@@ -169,6 +146,46 @@ internal b32 on_screen(hmm_v3 pos, int scale, Texture texture, b32 tilemapped = 
     return !(right_offscreen || top_offscreen || left_offscreen || bottom_offscreen);
 }
 
+internal b32 on_screen(hmm_v3 pos, hmm_v2 half_size)
+{
+    b32 is_onscreen;
+
+    b32 right_offscreen = pos.X - half_size.X > (game_window.base_width / 2);
+    b32 top_offscreen = pos.Y - half_size.Y > (game_window.base_height / 2);
+    b32 left_offscreen = pos.X + half_size.X < (-game_window.base_width / 2);
+    b32 bottom_offscreen = pos.Y + half_size.Y < (-game_window.base_height / 2);
+    
+    return !(right_offscreen || top_offscreen || left_offscreen || bottom_offscreen);
+}
+
+// QUAD
+internal void draw_quad(hmm_v3 pos, hmm_v2 half_size, hmm_vec3 color)
+{
+    if (!on_screen(pos, half_size))
+    {
+        return;
+    }
+    
+    if(blend_mode == FONT_BLEND)
+    {
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        blend_mode = QUAD_BLEND;
+    }
+
+    shader_set(shader_cache[QUAD_SHADER]);
+
+    pos.X += (game_window.base_width / 2);
+    pos.Y += (game_window.base_height / 2);
+
+    uniform_set_vec3(shader_cache[QUAD_SHADER], "quad_color", color);
+    uniform_set_vec3(shader_cache[QUAD_SHADER], "quad_pos", pos);
+    uniform_set_vec2(shader_cache[QUAD_SHADER], "quad_half_size", half_size);
+    uniform_set_mat4(shader_cache[QUAD_SHADER], "projection_matrix",
+                     projection_matrix);
+    
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+}
+
 // BAISC (STATIC) TEXTURED QUAD
 internal void draw_textured_quad(hmm_v3 pos, int scale, Texture texture)
 {
@@ -196,7 +213,6 @@ internal void draw_tilemapped_quad(hmm_v3 pos, int scale, int tile_index)
     Texture dummy = {};
     if (!on_screen(pos, scale, dummy, true))
     {
-        printf("ded");
         return;
     }
     
