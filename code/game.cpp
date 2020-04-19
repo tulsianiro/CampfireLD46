@@ -1,5 +1,6 @@
 #include "collision.cpp"
 #include "player.cpp"
+#include "level.cpp"
 
 global b32 game_initialized = false;
 
@@ -11,6 +12,7 @@ void simulate_frame(Input *input)
         change_volume(TEST_AUDIO, 0.1f);
         player = init_player({0.0f, 0.0f});
         init_camera(0, 100);
+        init_level();
         game_initialized = true;
     }
 
