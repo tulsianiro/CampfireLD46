@@ -47,6 +47,12 @@ inline void
 animation_set(AnimationSM *animation_sm, u32 animation_cache_id = LAST_ANIMATION,
               b32 playing = true, b32 looping = false)
 {
+    if(animation_cache_id == animation_sm->animation_id && animation_sm->playing)
+    {
+        animation_sm->looping = looping;
+        return;
+    }
+    
     animation_sm->animation_id = animation_cache_id;
     animation_sm->animation_timer = 0.0f;
     animation_sm->looping = looping;

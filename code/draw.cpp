@@ -17,6 +17,7 @@ enum Textures
 enum Animations
 {
     TEST_ANIMATION,
+    RUNNING_ANIMATION,
     LAST_ANIMATION
 };
 
@@ -84,7 +85,8 @@ void draw_init()
 
     // ANIMATIONS
     init_animation("player.png", TEST_ANIMATION, 16, 20, {32.0f, 32.0f}, .7f);
-
+    init_animation("player.png", RUNNING_ANIMATION, 0, 7, {32.0f, 32.0f}, .7f);
+    
     // FONTS
     LoadFont("Inconsolata", DEFAULT_FONT);
 
