@@ -39,8 +39,8 @@ void simulate_frame(Input *input)
     {
         hmm_vec3 tilemapped_pos = {-330.0f, 0.0f, 0.0f};
         tilemapped_pos = world_to_screen(tilemapped_pos);
-        // draw_tilemapped_quad(tilemapped_pos, 3, 2);
-        draw_quad(tilemapped_pos, {20, 20}, {1, 0, 0});
+        draw_tilemapped_quad(tilemapped_pos, 3, 2);
+        // draw_quad(tilemapped_pos, {20, 20}, {1, 0, 0});
     }
         // TODO(rohan): Game Object Updates
     {

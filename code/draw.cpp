@@ -120,7 +120,7 @@ internal void draw_textured_quad(hmm_v3 pos, hmm_v2 half_size, Texture texture)
 }
 
 // CHECK IF ON SCREEN (only supports textured draws with scale because im lazy)
-internal b32 on_screen(hmm_v3 pos, int scale, Texture texture, b32 tilemapped = false)
+internal b32 on_screen(hmm_v3 pos, int scale, b32 tilemapped, Texture *texture = NULL)
 {
     int texture_width;
     int texture_height;
@@ -132,8 +132,8 @@ internal b32 on_screen(hmm_v3 pos, int scale, Texture texture, b32 tilemapped = 
     }
     else
     {
-        texture_width = texture.width;
-        texture_height = texture.height;
+        texture_width = texture->width;
+        texture_height = texture->height;
     }
     
     b32 is_onscreen;
@@ -189,7 +189,7 @@ internal void draw_quad(hmm_v3 pos, hmm_v2 half_size, hmm_vec3 color)
 // BAISC (STATIC) TEXTURED QUAD
 internal void draw_textured_quad(hmm_v3 pos, int scale, Texture texture)
 {
-    if (!on_screen(pos, scale, texture))
+    if (!on_screen(pos, scale, false, &texture))
     {
         return;
     }
@@ -210,8 +210,7 @@ internal void draw_textured_quad(hmm_v3 pos, int scale, Texture texture)
 // TILEMAPPED QUADS
 internal void draw_tilemapped_quad(hmm_v3 pos, int scale, int tile_index)
 {
-    Texture dummy = {};
-    if (!on_screen(pos, scale, dummy, true))
+    if (!on_screen(pos, scale, true))
     {
         return;
     }
@@ -264,10 +263,11 @@ internal void draw_animated_quad(hmm_v3 pos, int scale, AnimationSM *animation_s
     {
         Animation *animation = &animation_cache[animation_sm->animation_id];
         Texture *texture = &animation->texture_atlas;
-        if (!on_screen(pos, scale, *texture))
+        if (!on_screen(pos, scale, false, texture))
         {
             return;
         }
+        
         f32 object_animation_timer = animation_sm->animation_timer;
         i32 anim_index = get_animation_frame(animation, object_animation_timer);
         i32 rows = texture->rows;
