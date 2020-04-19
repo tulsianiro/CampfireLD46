@@ -67,6 +67,14 @@ inline hmm_vec3 world_to_screen(hmm_vec3 pos)
     return toret;
 }
 
+inline hmm_vec2 world_to_screen(hmm_vec2 pos)
+{
+    hmm_vec2 toret = pos;
+    toret.X -= camera.x;
+    toret.Y -= camera.y;
+    return toret;
+}
+
 void draw_init()
 {
     u32 half_width = game_window.base_width / 2;
@@ -141,13 +149,13 @@ internal b32 on_screen(hmm_v3 pos, int scale, b32 tilemapped, Texture *texture =
 
     if (tilemapped)
     {
-        texture_width = tilemap.grid_width;
-        texture_height = tilemap.grid_height;
+        texture_width = tilemap.grid_width * scale;
+        texture_height = tilemap.grid_height * scale;
     }
     else
     {
-        texture_width = texture->width;
-        texture_height = texture->height;
+        texture_width = texture->width * scale;
+        texture_height = texture->height * scale;
     }
     
     b32 is_onscreen;
