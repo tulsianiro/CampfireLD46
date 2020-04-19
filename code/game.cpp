@@ -35,9 +35,9 @@ void simulate_frame(Input *input)
         camera.y += 5;
     }
 
-    for(int i = 0; i < 10000; i++)
+    for(int i = 0; i < 1; i++)
     {
-        hmm_vec3 tilemapped_pos = {100.0f, 100.0f, 0.0f};
+        hmm_vec3 tilemapped_pos = {-330.0f, 0.0f, 0.0f};
         tilemapped_pos = world_to_screen(tilemapped_pos);
         draw_tilemapped_quad(tilemapped_pos, 3, 2);
     }
@@ -48,7 +48,7 @@ void simulate_frame(Input *input)
 
     hmm_vec3 animated_pos = {0.0f, 0.0f, 0.0f};
     animated_pos = world_to_screen(animated_pos);
-    draw_animated_quad(animated_pos, 3, &animation_sm);
+    // draw_animated_quad(animated_pos, 3, &animation_sm);
 
     // hmm_v3 pos1 = {0.0f, 0.0f, 0.0f};
     // hmm_v3 pos2 = {(f32)input->mouse.mouse_x, (f32)input->mouse.mouse_y, 0.0f};

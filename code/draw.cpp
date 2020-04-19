@@ -147,6 +147,7 @@ internal b32 on_screen(hmm_v3 pos, int scale, Texture texture, b32 tilemapped = 
 {
     int texture_width;
     int texture_height;
+
     if (tilemapped)
     {
         texture_width = tilemap.grid_width;
@@ -157,13 +158,15 @@ internal b32 on_screen(hmm_v3 pos, int scale, Texture texture, b32 tilemapped = 
         texture_width = texture.width;
         texture_height = texture.height;
     }
-    int horizontal_limit = (game_window.base_width + texture_width * scale) / 2;
-    int vertical_limit = (game_window.base_height + texture_height * scale) / 2;
-    if (pos.X < camera.x - horizontal_limit || pos.X > camera.x + horizontal_limit || pos.Y < camera.y - vertical_limit || pos.Y > camera.y + vertical_limit)
-    {
-        return 0;
-    }
-    return 1;
+    
+    b32 is_onscreen;
+
+    b32 right_offscreen = (pos.X - (texture_width / 2)) > (game_window.base_width / 2);
+    b32 top_offscreen = (pos.Y - (texture_height / 2)) > (game_window.base_height / 2);
+    b32 left_offscreen = (pos.X + (texture_width / 2)) < (-game_window.base_width / 2);
+    b32 bottom_offscreen = (pos.Y + (texture_height / 2)) < (-game_window.base_height / 2);
+    
+    return !(right_offscreen || top_offscreen || left_offscreen || bottom_offscreen);
 }
 
 // BAISC (STATIC) TEXTURED QUAD
@@ -193,8 +196,10 @@ internal void draw_tilemapped_quad(hmm_v3 pos, int scale, int tile_index)
     Texture dummy = {};
     if (!on_screen(pos, scale, dummy, true))
     {
+        printf("ded");
         return;
     }
+    
     if(blend_mode == FONT_BLEND)
     {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
