@@ -17,7 +17,7 @@ void simulate_frame(Input *input)
         game_initialized = true;
     }
 
-    draw_map();
+    draw_tilemapped_quad({100.0f, 100.0f, 0.0f}, 3, 2);
     
     // TODO(rohan): Game Object Updates
     {

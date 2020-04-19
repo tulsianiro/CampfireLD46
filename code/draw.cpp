@@ -68,7 +68,7 @@ void draw_init()
     // TILEMAP
 #define TILE_WIDTH 16
 #define TILE_HEIGHT 16
-    init_tilemap("levelfile.txt", "tileset.png", TILE_WIDTH, TILE_HEIGHT);
+    init_tilemap("tileset.png", TILE_WIDTH, TILE_HEIGHT);
     
     glGenVertexArrays(1, &quad_vao);
     glBindVertexArray(quad_vao);
@@ -134,23 +134,41 @@ internal void draw_textured_quad(hmm_v3 pos, int scale, Texture texture)
     draw_textured_quad(pos, half_size, texture);
 }
 
-internal void draw_map()
+internal void draw_tilemapped_quad(hmm_v3 pos, int scale, int tile_index)
 {
-    int x = -game_window.base_width / 2;
-    int y = -game_window.base_height / 2;
-    int reader = 0;
-    for(int i = 0; i < tilemap.map_width; i++)
+     if(blend_mode == FONT_BLEND)
     {
-        for(int j = 0; j < tilemap.map_height; j++)
-        {
-            int texture_code = tilemap.tiles[reader++];
-            // NOTE(jun): not sure why these have to be f32, but keeping it for consistency
-            // with animated quad code (seamless passing to hmm_vec2?)
-            f32 u = (f32)i / tilemap.map_width;
-            f32 v = (f32)j / tilemap.map_height;
-            // TODO(jun): texture indexing, shader, similar to animated quad code
-        }
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        blend_mode = QUAD_BLEND;
     }
+
+
+     Texture *texture = &(tilemap.texture);
+        
+     i32 rows = texture->rows;
+     i32 cols = texture->cols;
+     f32 grid_x = (f32)(tile_index % cols);
+     f32 grid_y = (f32)(tile_index / cols);
+     shader_set(shader_cache[ANIM_QUAD_SHADER]);
+     pos.X += (game_window.base_width / 2);
+     pos.Y += (game_window.base_height / 2);
+
+     hmm_v2 half_size = {(f32)(scale * texture->grid_width / 2),
+                         (f32)(scale * texture->grid_height / 2)};
+     hmm_vec2 uv_offset = {(f32)(grid_x * texture->grid_width / texture->width),
+                           (f32)(grid_y * texture->grid_height / texture->height)};
+     hmm_vec2 atlas_dim = {(f32)cols, (f32)rows};
+        
+     uniform_set_vec3(shader_cache[ANIM_QUAD_SHADER], "quad_pos", pos);
+     uniform_set_vec2(shader_cache[ANIM_QUAD_SHADER], "quad_half_size", half_size);
+     uniform_set_mat4(shader_cache[ANIM_QUAD_SHADER], "projection_matrix",
+                      projection_matrix);
+     uniform_set_vec2(shader_cache[ANIM_QUAD_SHADER], "uv_offset", uv_offset);
+     uniform_set_vec2(shader_cache[ANIM_QUAD_SHADER], "atlas_dim", atlas_dim);
+        
+     texture_set(GL_TEXTURE0, *texture);    
+     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+       
 }
 
 // ANIMATIONS
