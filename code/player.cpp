@@ -65,6 +65,7 @@ player_update_and_render()
     }
 
     hmm_v3 pos = {player.pos.X, player.pos.Y, 0.0f};
+    pos = world_to_screen(pos);
     draw_animated_quad(pos, player.scale, &player.anim_sm);
 
     animation_sm_update(&player.anim_sm);

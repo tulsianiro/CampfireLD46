@@ -16,6 +16,7 @@ void simulate_frame(Input *input)
         game_initialized = true;
     }
 
+    level_update_and_render();
     player_update_and_render();
 
     local_persist char buf[128];
