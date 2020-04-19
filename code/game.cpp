@@ -16,7 +16,13 @@ void simulate_frame(Input *input)
 
     player_update_and_render();
 
-    char buf[128];
-    sprintf_s(buf, 128, "FPS:%d", (int)(1/dt));
-    RenderText(&font_cache[DEFAULT_FONT], {1, 0, 0, 1}, {0.01f, 0.04f}, buf);
+    local_persist char buf[128];
+    local_persist u32 accum = 0;
+    if(!(accum++ % 15))
+    {
+        sprintf_s(buf, 128, "FPS:%d", (int)(1/dt));
+    }
+
+    hmm_v2 text_render_pos = ortho_coordinates_to_window(player.pos);
+    RenderText(&font_cache[DEFAULT_FONT], {1, 0, 0, 1}, text_render_pos, buf);
 }

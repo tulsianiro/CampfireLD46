@@ -16,8 +16,14 @@ enum Textures
 
 enum Animations
 {
-    TEST_ANIMATION,
-    RUNNING_ANIMATION,
+    RECHARGE_RIGHT_ANIMATION,
+    RECHARGE_LEFT_ANIMATION,
+    FALLING_RIGHT_ANIMATION,
+    FALLING_LEFT_ANIMATION,
+    RUNNING_RIGHT_ANIMATION,
+    RUNNING_LEFT_ANIMATION,
+    IDLE_RIGHT_ANIMATION,
+    IDLE_LEFT_ANIMATION,
     LAST_ANIMATION
 };
 
@@ -84,8 +90,14 @@ void draw_init()
     init_texture("0.png", TEST_TEXTURE2);
 
     // ANIMATIONS
-    init_animation("player.png", TEST_ANIMATION, 16, 20, {32.0f, 32.0f}, .7f);
-    init_animation("player.png", RUNNING_ANIMATION, 0, 7, {32.0f, 32.0f}, .7f);
+    init_animation("player.png", RECHARGE_RIGHT_ANIMATION, 0, 15, {32.0f, 32.0f}, 2.0f);
+    init_animation("player.png", RECHARGE_LEFT_ANIMATION, 16, 31, {32.0f, 32.0f}, 2.0f);
+    init_animation("player.png", FALLING_RIGHT_ANIMATION, 32, 36, {32.0f, 32.0f}, 0.7f);
+    init_animation("player.png", FALLING_LEFT_ANIMATION, 48, 52, {32.0f, 32.0f}, 0.7f);
+    init_animation("player.png", RUNNING_RIGHT_ANIMATION, 64, 71, {32.0f, 32.0f}, 0.7f);
+    init_animation("player.png", RUNNING_LEFT_ANIMATION, 80, 87, {32.0f, 32.0f}, 0.7f);
+    init_animation("player.png", IDLE_RIGHT_ANIMATION, 96, 99, {32.0f, 32.0f}, 0.7f);
+    init_animation("player.png", IDLE_LEFT_ANIMATION, 112, 116, {32.0f, 32.0f}, 0.7f);
     
     // FONTS
     LoadFont("Inconsolata", DEFAULT_FONT);
@@ -299,7 +311,36 @@ internal void draw_animated_quad(hmm_v3 pos, int scale, AnimationSM *animation_s
     }
 }
 
-internal void RenderText(Font *font, hmm_vec4 color, hmm_vec2 position, const char *text)
+internal hmm_v2
+ortho_coordinates_to_window(hmm_v2 pos)
+{
+    hmm_v2 return_pos = pos;
+
+    // this is how much of the window is available, but we ortho project to 640, 360
+    i32 playable_width = game_window.width - 2*game_window.horizontal_offset;
+    i32 playable_height = game_window.height - 2*game_window.vertical_offset;
+
+    // ratio of base width and height
+    return_pos.X += (f32)game_window.base_width / 2;
+    return_pos.Y += (f32)game_window.base_height / 2;
+    return_pos.X /= (f32)game_window.base_width;
+    return_pos.Y /= (f32)game_window.base_height;
+
+    // how much of playable dimensions we take
+    return_pos.X *= playable_width;
+    return_pos.Y *= playable_height;
+
+    // playable dimensions don't account for black bars
+    return_pos.X += game_window.horizontal_offset;
+    return_pos.Y += game_window.vertical_offset;
+    
+    return_pos.X /= (f32)game_window.width;
+    return_pos.Y /= (f32)game_window.height;
+    return return_pos;
+}
+
+internal void
+RenderText(Font *font, hmm_vec4 color, hmm_vec2 position, const char *text)
 {    
     if(blend_mode == QUAD_BLEND)
     {
