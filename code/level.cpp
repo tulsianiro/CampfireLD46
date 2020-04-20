@@ -42,7 +42,7 @@ void init_level()
     level.level[level.max_row++] = ".......vwx...DEEEEEF....................";
     level.level[level.max_row++] = ".......lmn..............................";
     level.level[level.max_row++] = ".....!.bcd..............................";
-    level.level[level.max_row++] = "..NOP..XYZ.....I........................";
+    level.level[level.max_row++] = "..NOP#.XYZ.....I................#.......";
     level.level[level.max_row++] = "DEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEF.";
     level.level[level.max_row++] = ":;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;<.";
     level.level[level.max_row++] = "011111111111111111111111111111111111112.";
@@ -91,6 +91,20 @@ void init_level()
                 case '!':
                 {
                     player.pos = {world_x, world_y};
+                } break;
+                case '#':
+                {
+                    Fireplace fireplace;
+                    fireplace.pos.X = x * 32.0f - level.world_offset.X;
+                    fireplace.pos.Y = y * 32.0f - level.world_offset.Y;
+                    AABB aabb;
+                    aabb.pos = fireplace.pos;
+                    aabb.half_dim = {32.0f, 32.0f};
+                    fireplace.aabb = aabb;
+                    fireplace.anim_sm = init_animation_sm(FIREPLACE_ANIMATION, true, true);
+                    // fireplace.anim_sm.animation_timer = (f32)num_fireplaces / 3.0f;
+                    
+                    fireplaces[num_fireplaces++] = fireplace;
                 } break;
                 case '4':
                 case '5':

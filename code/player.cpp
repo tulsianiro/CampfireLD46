@@ -62,10 +62,11 @@ internal void set_respawn_pos(hmm_v2 pos)
 }
 internal void respawn_player()
 {
-        player.pos = player.spawn_pos;
-        player.vel = {0.0f, 0.0f};
-        player.direction = RIGHT;
-        player.in_air = true;
+    player.pos.X = player.spawn_pos.X;
+    player.pos.Y = player.spawn_pos.Y + 40.0f;
+    player.vel = {0.0f, 0.0f};
+    player.direction = RIGHT;
+    player.in_air = true;
 }
 
 internal void
@@ -150,9 +151,6 @@ player_update_and_render()
 // apply limitations
     player.vel.X = HMM_Clamp(-player.max_horizontal_speed, player.vel.X, player.max_horizontal_speed);
     player.vel.Y = HMM_Clamp(-player.max_vertical_speed, player.vel.Y, player.max_vertical_speed);
-
-// debug
-    printf("velx: %f, vely: %f\n",player.vel.X, player.vel.Y);
     
     // set position
     player.pos += player.vel * dt;
@@ -243,6 +241,15 @@ player_update_and_render()
             respawn_player();
         }
         int dummy = 1;
+    }
+    for (int i = 0; i < num_fireplaces; i++)
+    {
+        Fireplace fireplace = fireplaces[i];
+        b32 collided = aabb_vs_aabb(player.aabb, fireplace.aabb);
+        if(collided)
+        {
+            player.spawn_pos = fireplace.pos;
+        }
     }
     pos = world_to_screen({player.pos.X, player.pos.Y, 0.0f});
     // draw_quad(pos, player.aabb.half_dim, {1.0, 0.0, 0.0});

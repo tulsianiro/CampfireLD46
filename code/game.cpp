@@ -20,6 +20,17 @@ struct Spike
 global Spike spikes[512];
 global int num_spikes;
 
+struct Fireplace
+{
+    hmm_v2 pos;
+    AABB aabb;
+    AnimationSM anim_sm;
+    
+};
+
+global Fireplace fireplaces[32];
+global int num_fireplaces;
+
 #define MAX_AABBS 512
 struct Level
 {
@@ -50,6 +61,15 @@ void simulate_frame(Input *input)
 
     // update objects
     level_update_and_render();
+    for (int i = 0; i < num_fireplaces; i++)
+    {
+        animation_sm_update(&fireplaces[i].anim_sm);
+        hmm_v3 pos = {fireplaces[i].pos.X, fireplaces[i].pos.Y, 0.0f};
+        hmm_v3 corpos = world_to_screen(pos);
+        draw_animated_quad(corpos, 2.0f, &(fireplaces[i].anim_sm));
+        // draw_quad(corpos, {32.0f, 32.0f}, {1.0f, 0.0f, 0.0f});
+        
+    }
     player_update_and_render();
 
     // follow player text test

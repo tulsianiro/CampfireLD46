@@ -16,6 +16,7 @@ enum Textures
 
 enum Animations
 {
+    FIREPLACE_ANIMATION,
     RECHARGE_RIGHT_ANIMATION,
     RECHARGE_LEFT_ANIMATION,
     FALLING_RIGHT_ANIMATION,
@@ -110,6 +111,7 @@ void draw_init()
     init_animation("player.png", RUNNING_LEFT_ANIMATION, 80, 87, {32.0f, 32.0f}, 0.7f);
     init_animation("player.png", IDLE_RIGHT_ANIMATION, 96, 99, {32.0f, 32.0f}, 0.7f);
     init_animation("player.png", IDLE_LEFT_ANIMATION, 112, 116, {32.0f, 32.0f}, 0.7f);
+    init_animation("campfire.png", FIREPLACE_ANIMATION, 0, 7, {32.0f, 32.0f}, 1.0f);
     
     // FONTS
     LoadFont("Inconsolata", DEFAULT_FONT);
