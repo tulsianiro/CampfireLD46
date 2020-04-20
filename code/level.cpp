@@ -1,27 +1,4 @@
 const char *level_file = "../res/levels/level.txt";    
-#define MAX_ROWS 64
-#define MAX_COLS 128
-
-struct Tile
-{
-    b32 blocking;
-    int index;
-};
-
-struct Level
-{
-    char *level[MAX_ROWS];
-
-    // 0, 0 is top left
-    // max_col, max_row is bottom-right
-    u32 max_col;
-    u32 max_row;
-    int tilescale;
-    hmm_v2 world_offset;
-    Tile tiles[MAX_COLS][MAX_ROWS];
-};
-
-global Level level;
 
 void init_level()
 {
@@ -95,6 +72,7 @@ void init_level()
                     Tile tile;
                     tile.blocking = true;
                     tile.index = (int)c - '0';
+                    tile.aabb = init_aabb_from_tile(y, x, level.tilescale, level.world_offset);
                     level.tiles[y][x] = tile;
                 } break;   
             }
@@ -103,7 +81,7 @@ void init_level()
 }
 
 internal void level_update_and_render()
-{
+{    
     // render
     for (int y = 0; y < level.max_row; y++)
     {
@@ -116,6 +94,9 @@ internal void level_update_and_render()
                 hmm_v3 pos = {world_x, world_y, 0.0f};
                 pos = world_to_screen(pos);
                 draw_tilemapped_quad(pos, level.tilescale, level.tiles[y][x].index);
+                hmm_v2 quad_pos = world_to_screen(level.tiles[y][x].aabb.pos);
+                hmm_v3 final_pos = {quad_pos.X, quad_pos.Y, 0.0f};
+                draw_quad(final_pos, level.tiles[y][x].aabb.half_dim, {0.0, 1.0, 1.0});
             }
         }
     }

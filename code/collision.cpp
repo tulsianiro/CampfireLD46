@@ -18,6 +18,16 @@ aabb_vs_aabb(AABB aabb1, AABB aabb2)
         p1.X - half_size1.X < p2.X +  half_size2.X;
 }
 
+internal AABB init_aabb_from_tile(int row, int col, int scale, hmm_v2 world_offset)
+{
+    AABB return_aabb;
+    return_aabb.pos.X = (col * tilemap.grid_width * scale) - world_offset.X;
+    return_aabb.pos.Y = (row * tilemap.grid_height * scale) - world_offset.Y;
+    return_aabb.half_dim = {(f32)(tilemap.grid_width) * scale / 2.0f,
+                            (f32)(tilemap.grid_height) * scale / 2.0f};
+    return return_aabb;
+}
+
 // internal AABB init_aabb_from_texture(hmm_v2 pos, u32 texture_cache_id)
 // {
 //     AABB return_aabb;

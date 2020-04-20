@@ -12,6 +12,7 @@ struct Player
     i32 scale;
     AnimationSM anim_sm;
     u32 direction;
+    AABB aabb;
 };
 
 global Player player;
@@ -25,6 +26,10 @@ init_player(hmm_v2 pos)
     return_player.speed = 10.0f;
     return_player.scale = 2;
     return_player.anim_sm = init_animation_sm(IDLE_RIGHT_ANIMATION, true, true);
+    return_player.aabb.pos = return_player.pos;
+    hmm_v2 player_half_dim = {8.0f, 16.0f};
+    return_player.aabb.half_dim = return_player.scale * player_half_dim;
+    
     return return_player;
 }
 
@@ -74,8 +79,26 @@ player_update_and_render()
     }
 
     hmm_v3 pos = {player.pos.X, player.pos.Y, 0.0f};
-    pos = world_to_screen(pos);
-    draw_animated_quad(pos, player.scale, &player.anim_sm);
+    player.aabb.pos = {player.pos.X, player.pos.Y};
+    int player_grid_x = (player.pos.X + level.world_offset.X) / (tilemap.grid_width * level.tilescale);
+    int player_grid_y = (player.pos.Y + level.world_offset.Y) / (tilemap.grid_height * level.tilescale);
+    // hmm_v2 tile_pos = level.tiles[player_grid_y][player_grid_x].aabb.pos;
+    // hmm_v2 tile_half_boi = level.tiles[player_grid_y][player_grid_x].aabb.half_dim;
+    // check your own tile
+    if(aabb_vs_aabb(player.aabb, level.tiles[player_grid_y][player_grid_x].aabb))
+    {
+        
+    }
 
+    if(aabb_vs_aabb(player.aabb, level.tiles[player_grid_y][player_grid_x].aabb))
+    {
+     
+    }
+    
+    pos = world_to_screen(pos);
+    // tile_pos = world_to_screen(tile_pos);
+    draw_quad(pos, player.aabb.half_dim, {1.0, 0.0, 0.0});
+    // draw_quad({tile_pos.X, tile_pos.Y, 0.0f}, tile_half_boi, {0.0, 1.0, 0.0});
+    draw_animated_quad(pos, player.scale, &player.anim_sm);
     animation_sm_update(&player.anim_sm);
 }
