@@ -11,9 +11,19 @@ struct Tile
     AABB aabb;
 };
 
+struct Spike
+{
+    hmm_v2 pos;
+    AABB aabb;
+};
+
+global Spike spikes[512];
+global int num_spikes;
+
 #define MAX_AABBS 512
 struct Level
 {
+    int death_y;
     char *level[MAX_ROWS];
     AABB aabb_list[MAX_AABBS];
     int num_aabbs;

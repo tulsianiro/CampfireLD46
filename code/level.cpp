@@ -41,13 +41,14 @@ void init_level()
     level.level[level.max_row++] = "..............QQQQQ.....................";
     level.level[level.max_row++] = ".......vwx...DEEEEEF....................";
     level.level[level.max_row++] = ".......lmn..............................";
-    level.level[level.max_row++] = ".......bcd.............!................";
-    level.level[level.max_row++] = "..NOP..XYZ..............................";
+    level.level[level.max_row++] = ".....!.bcd..............................";
+    level.level[level.max_row++] = "..NOP..XYZ.....I........................";
     level.level[level.max_row++] = "DEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEF.";
     level.level[level.max_row++] = ":;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;<.";
     level.level[level.max_row++] = "011111111111111111111111111111111111112.";
     level.level[level.max_row++] = "........................................";
 
+    level.death_y = -level.world_offset.Y - 300;
     AABB_Specifier aabb_specifiers[] =
     {
         {0, 39, 1, 4},
@@ -90,6 +91,37 @@ void init_level()
                 case '!':
                 {
                     player.pos = {world_x, world_y};
+                } break;
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case 'H':
+                case 'I':
+                case 'J':
+                case 'K':
+                case 'R':
+                case 'U':
+                case '\\':
+                case '_':
+                case 'f':
+                case 'i':
+                case 'p':
+                case 's':
+                {
+                    // spike
+                    Tile tile;
+                    tile.blocking = false;
+                    tile.index = (int)c - '0';
+                    level.tiles[y][x] = tile;
+                    Spike spike;
+                    spike.pos.X = x * 32.0f - level.world_offset.X;
+                    spike.pos.Y = y * 32.0f - level.world_offset.Y;
+                    AABB aabb;
+                    aabb.pos = spike.pos;
+                    aabb.half_dim = {16.0f, 16.0f};
+                    spike.aabb = aabb;
+                    spikes[num_spikes++] = spike;
                 } break;
                 default:
                 {
