@@ -193,6 +193,10 @@ int main()
         
         f64 now_time = glfwGetTime();
         dt = (f32)(now_time - last_time);
+        if (dt > 0.02f)
+        {
+            dt = 0.01666f;
+        }
         last_time = now_time;
     }
     

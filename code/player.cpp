@@ -6,6 +6,7 @@ enum Direction
 
 struct Player
 {
+    hmm_v2 spawn_pos;
     hmm_v2 pos;
     hmm_v2 vel;
     f32 speed;
@@ -23,13 +24,13 @@ struct Player
     f32 epsilon = 0.5f;
 
     // active
-    int max_fat_jump_frames = 10;
+    int max_fat_jump_frames = 6;
     int fat_jump_frames = max_fat_jump_frames;
-    f32 run_accel = 500.0f;
-    f32 jump_accel = 50000.0f;
-    f32 max_horizontal_speed = 400.0f;
-    f32 max_vertical_speed = 200.0f;
-
+    f32 run_accel = 4000.0f;
+    f32 jump_accel = 6000.0f;
+    f32 max_horizontal_speed = 300.0f;
+    f32 max_vertical_speed = 800.0f;
+    b32 jump_ready = false;
     f32 light_quantity = 1.0f;
 };
 
@@ -40,6 +41,7 @@ init_player(hmm_v2 pos)
 {
     Player return_player;
     return_player.pos = pos;
+    return_player.spawn_pos = pos;
     return_player.vel = {0.0f, 0.0f};
     return_player.speed = 10.0f;
     return_player.scale = 2;
@@ -55,6 +57,18 @@ init_player(hmm_v2 pos)
     return return_player;
 }
 
+internal void set_respawn_pos(hmm_v2 pos)
+{
+    player.spawn_pos = pos;
+}
+internal void respawn_player()
+{
+        player.pos = player.spawn_pos;
+        player.vel = {0.0f, 0.0f};
+        player.direction = RIGHT;
+        player.in_air = true;
+}
+
 internal void
 player_update_and_render()
 {
@@ -63,6 +77,11 @@ player_update_and_render()
     
     b32 is_moving = false;
     b32 changed_direction = false;
+
+    if (key_pressed(KEY_Q))
+    {
+        respawn_player();
+    }
     
     if(key_is_down(KEY_LEFT) && key_is_down(KEY_RIGHT))
     {
@@ -94,11 +113,15 @@ player_update_and_render()
 
     if(key_is_down(KEY_C))
     {
-        if (player.fat_jump_frames > 0)
+        if (player.fat_jump_frames > 0 && player.jump_ready)
         {
             player.fat_jump_frames -= 1;
             player.vel.Y += player.jump_accel * dt;
         }
+    }
+    else if(player.in_air)
+    {
+        player.jump_ready = false;
     }
 
     // natural forces
@@ -175,6 +198,7 @@ player_update_and_render()
                 {
                     player.in_air = false;
                     player.fat_jump_frames = player.max_fat_jump_frames;
+                    player.jump_ready = true;
                 }
             
                 player.aabb.pos.X += (intersection.half_dim.X) * x_dir;
@@ -209,8 +233,23 @@ player_update_and_render()
     
     player.pos.X = player.aabb.pos.X;
     player.pos.Y = player.aabb.pos.Y;
+    if (player.pos.Y < level.death_y)
+    {
+        respawn_player();
+    }
+    for (int i = 0; i < num_spikes; i++)
+    {
+        Spike spike = spikes[i];
+
+        b32 collided = aabb_vs_aabb(player.aabb, spike.aabb);
+        if(collided)
+        {
+            respawn_player();
+        }
+        int dummy = 1;
+    }
     pos = world_to_screen({player.pos.X, player.pos.Y, 0.0f});
-    draw_quad(pos, player.aabb.half_dim, {1.0, 0.0, 0.0});
+    // draw_quad(pos, player.aabb.half_dim, {1.0, 0.0, 0.0});
     draw_animated_quad(pos, player.scale, &player.anim_sm);
     animation_sm_update(&player.anim_sm);
 }
