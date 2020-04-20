@@ -13,6 +13,7 @@ struct Player
     AnimationSM anim_sm;
     u32 direction;
     AABB aabb;
+    b32 in_air;
 };
 
 global Player player;
@@ -25,10 +26,14 @@ init_player(hmm_v2 pos)
     return_player.vel = {0.0f, 0.0f};
     return_player.speed = 10.0f;
     return_player.scale = 2;
-    return_player.anim_sm = init_animation_sm(IDLE_RIGHT_ANIMATION, true, true);
+
     return_player.aabb.pos = return_player.pos;
     hmm_v2 player_half_dim = {8.0f, 16.0f};
     return_player.aabb.half_dim = return_player.scale * player_half_dim;
+
+    return_player.anim_sm = init_animation_sm(IDLE_RIGHT_ANIMATION, true, true);
+    return_player.direction = RIGHT;
+    return_player.in_air = true;
     
     return return_player;
 }
@@ -38,58 +43,38 @@ player_update_and_render()
 {
     b32 is_moving = false;
     
-    // TODO(rohan): set anim sm state to different animations
     if(key_is_down(KEY_LEFT) && key_is_down(KEY_RIGHT))
     {
+        // DO NOTHING
     }
     else if(key_is_down(KEY_LEFT))
-    {
+    {        
         is_moving = true;
         player.direction = LEFT;
         player.pos.X -= 5;
         animation_set(&player.anim_sm, RUNNING_LEFT_ANIMATION, true, true);
+     
     }
     else if(key_is_down(KEY_RIGHT))
     {
+
         is_moving = true;
         player.pos.X += 5;
         player.direction = RIGHT;
         animation_set(&player.anim_sm, RUNNING_RIGHT_ANIMATION, true, true);
     }
-    // test motion for follow cam
-    if(key_is_down(KEY_UP))
-    {
-        player.pos.Y += 5;
-    }
-    if(key_is_down(KEY_DOWN))
-    {
-        player.pos.Y -= 5;
-    }
 
-    if(!is_moving)
+    if(key_is_down(KEY_SPACE))
     {
-        if(player.direction == LEFT)
-        {
-            animation_set(&player.anim_sm, IDLE_LEFT_ANIMATION, true, true);
-        }
-        else if(player.direction == RIGHT)
-        {
-            animation_set(&player.anim_sm, FALLING_RIGHT_ANIMATION, true, true);
-        }
+        player.pos.Y += 20;
     }
-
+            
     f32 gravity = 10.0f;
     player.pos.Y -= gravity;
-    // int player_grid_x = (player.pos.X + level.world_offset.X) / (tilemap.grid_width * level.tilescale);
-    // int player_grid_y = (player.pos.Y + level.world_offset.Y) / (tilemap.grid_height * level.tilescale);
-    // hmm_v2 tile_pos = level.tiles[player_grid_y][player_grid_x].aabb.pos;
-    // hmm_v2 tile_half_boi = level.tiles[player_grid_y][player_grid_x].aabb.half_dim;
-
     hmm_v3 pos = {player.pos.X, player.pos.Y, 0.0f};
     player.aabb.pos = {player.pos.X, player.pos.Y};
-
     b32 did_collide = false;
-    
+    player.in_air = true; // this gets unset in while loop if player bottom collides
     do
     {
         did_collide = false;
@@ -108,6 +93,11 @@ player_update_and_render()
                 did_collide = true;
                 int x_dir = (player.aabb.pos.X - intersection.pos.X) > 0 ? 1 : -1;
                 int y_dir = (player.aabb.pos.Y - intersection.pos.Y) > 0 ? 1 : -1;
+                if(y_dir == 1)
+                {
+                    player.in_air = false;
+                }
+                
                 if(intersection.half_dim.Y <= intersection.half_dim.X)
                 {
                     x_dir = 0;
@@ -122,6 +112,30 @@ player_update_and_render()
             }
         }
     } while(did_collide);
+
+    if(player.in_air)
+    {
+        if(player.direction == LEFT)
+        {
+            animation_set(&player.anim_sm, FALLING_LEFT_ANIMATION, true, true);
+        }
+        else
+        {
+            animation_set(&player.anim_sm, FALLING_RIGHT_ANIMATION, true, true);
+        }
+    }
+
+    if(!is_moving && !player.in_air)
+    {
+        if(player.direction == LEFT)
+        {
+            animation_set(&player.anim_sm, IDLE_LEFT_ANIMATION, true, true);
+        }
+        else if(player.direction == RIGHT)
+        {
+            animation_set(&player.anim_sm, IDLE_RIGHT_ANIMATION, true, true);
+        }
+    }
     
     player.pos.X = player.aabb.pos.X;
     player.pos.Y = player.aabb.pos.Y;
@@ -129,9 +143,4 @@ player_update_and_render()
     draw_quad(pos, player.aabb.half_dim, {1.0, 0.0, 0.0});
     draw_animated_quad(pos, player.scale, &player.anim_sm);
     animation_sm_update(&player.anim_sm);
-
-    // draw_quad({tile_pos.X, tile_pos.Y, 0.0f}, tile_half_boi, {0.0, 1.0, 0.0});
-    // tile_pos = world_to_screen(tile_pos);
-    // intersection_aabb.pos = world_to_screen(intersection_aabb.pos);
-    // draw_quad({intersection_aabb.pos.X, intersection_aabb.pos.Y, 0.0f}, intersection_aabb.half_dim, {1.0, 0.4, 0.7});
 }
