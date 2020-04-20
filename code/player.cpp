@@ -51,6 +51,15 @@ player_update_and_render()
         player.direction = RIGHT;
         animation_set(&player.anim_sm, RUNNING_RIGHT_ANIMATION, true, true);
     }
+    // test motion for follow cam
+    if(key_is_down(KEY_UP))
+    {
+        player.pos.Y += 5;
+    }
+    if(key_is_down(KEY_DOWN))
+    {
+        player.pos.Y -= 5;
+    }
 
     if(!is_moving)
     {
