@@ -15,6 +15,10 @@ struct Player
     u32 direction;
     AABB aabb;
     b32 in_air;
+    f32 default_death_timer = 1.0f;
+    f32 death_timer = default_death_timer;
+
+    b32 marked_for_death = false;
 
     // movement vars
     // natural
@@ -60,9 +64,13 @@ init_player(hmm_v2 pos)
 internal void set_respawn_pos(hmm_v2 pos)
 {
     player.spawn_pos = pos;
+    player.light_quantity = 1.0f;
 }
 internal void respawn_player()
 {
+    animation_set(&player.anim_sm, IDLE_RIGHT_ANIMATION, true, true);
+    player.marked_for_death = false;
+    player.death_timer = player.default_death_timer;
     player.pos.X = player.spawn_pos.X;
     player.pos.Y = player.spawn_pos.Y + 40.0f;
     player.vel = {0.0f, 0.0f};
@@ -73,190 +81,234 @@ internal void respawn_player()
 internal void
 player_update_and_render()
 {
-    player.light_quantity -= 0.05 * dt;
-    player.light_quantity = player.light_quantity < 0 ? 0 : player.light_quantity;
-    
-    b32 is_moving = false;
-    b32 changed_direction = false;
+    if (!player.marked_for_death)
+    {
+        player.light_quantity -= 0.05 * dt;
+        player.light_quantity = player.light_quantity < 0 ? 0 : player.light_quantity;
 
-    if (key_pressed(KEY_Q))
-    {
-        respawn_player();
-    }
-    
-    if(key_is_down(KEY_LEFT) && key_is_down(KEY_RIGHT))
-    {
-        // DO NOTHING
-    }
-    else if(key_is_down(KEY_LEFT))
-    {
-        if(player.vel.X > 0)
-        {
-            changed_direction = true;
-        }
-        is_moving = true;
-        player.direction = LEFT;
-        player.vel.X -= player.run_accel * dt;
-        animation_set(&player.anim_sm, RUNNING_LEFT_ANIMATION, true, true);
-     
-    }
-    else if(key_is_down(KEY_RIGHT))
-    {
-        if (player.vel.X < 0)
-        {
-            changed_direction = true;
-        }
-        is_moving = true;
-        player.vel.X += player.run_accel * dt;
-        player.direction = RIGHT;
-        animation_set(&player.anim_sm, RUNNING_RIGHT_ANIMATION, true, true);
-    }
-
-    if(key_is_down(KEY_C))
-    {
-        if (player.fat_jump_frames > 0 && player.jump_ready)
-        {
-            player.fat_jump_frames -= 1;
-            player.vel.Y += player.jump_accel * dt;
-        }
-    }
-    else if(player.in_air)
-    {
-        player.jump_ready = false;
-    }
-
-    // natural forces
-    static int safety_frames = 10;
-    if(safety_frames > 0)
-    {
-        safety_frames--;
-    }
-    else
-    {
-        player.vel.Y -= player.gravity * dt;
-    }
-    if (!is_moving || changed_direction)
-    {
-        if (player.in_air)
-        {
-            player.vel.X *= player.horizontal_drag_air;
-        }
-        else
-        {
-            player.vel.X *= player.horizontal_drag_ground;
-        }
-        f32 absX = player.vel.X >= 0 ? player.vel.X : -player.vel.X;
-        if (absX < player.epsilon)
-        {
-            player.vel.X = 0;
-        }
-    }
-
-// apply limitations
-    player.vel.X = HMM_Clamp(-player.max_horizontal_speed, player.vel.X, player.max_horizontal_speed);
-    player.vel.Y = HMM_Clamp(-player.max_vertical_speed, player.vel.Y, player.max_vertical_speed);
-    
-    // set position
-    player.pos += player.vel * dt;
-    hmm_v3 pos = {player.pos.X, player.pos.Y, 0.0f};
-    player.aabb.pos = {player.pos.X, player.pos.Y};
-    b32 did_collide = false;
-    player.in_air = true; // this gets unset in while loop if player bottom collides
-    do
-    {
-        did_collide = false;
-        
-        for(int i = 0; i < level.num_aabbs; ++i)
-        {
-            AABB aabb = level.aabb_list[i];
-            // hmm_v2 quad_pos = world_to_screen(aabb.pos);
-            // hmm_v3 final_pos = {quad_pos.X, quad_pos.Y, 0.0f};
-            // draw_quad(final_pos, aabb.half_dim, {0.0, 0.2, 0.6});
-        
-            AABB intersection;
-            b32 did_intersect = aabb_vs_aabb(player.aabb, aabb, &intersection);
-            if(did_intersect)
-            {
-                did_collide = true;
-                int x_dir = (player.aabb.pos.X - intersection.pos.X) > 0 ? 1 : -1;
-                int y_dir = (player.aabb.pos.Y - intersection.pos.Y) > 0 ? 1 : -1;
-
-                if(intersection.half_dim.Y <= intersection.half_dim.X)
-                {
-                    x_dir = 0;
-                    player.vel.Y = 0.0f;
-                }
-                else
-                {
-                    y_dir = 0;
-                    player.vel.X = 0.0f;
-                }
-
-                if(y_dir == 1)
-                {
-                    player.in_air = false;
-                    player.fat_jump_frames = player.max_fat_jump_frames;
-                    player.jump_ready = true;
-                }
-            
-                player.aabb.pos.X += (intersection.half_dim.X) * x_dir;
-                player.aabb.pos.Y += (intersection.half_dim.Y) * y_dir;
-            }
-        }
-    } while(did_collide);
-
-    if(player.in_air)
-    {
-        if(player.direction == LEFT)
-        {
-            animation_set(&player.anim_sm, FALLING_LEFT_ANIMATION, true, true);
-        }
-        else
-        {
-            animation_set(&player.anim_sm, FALLING_RIGHT_ANIMATION, true, true);
-        }
-    }
-
-    if(!is_moving && !player.in_air)
-    {
-        if(player.direction == LEFT)
-        {
-            animation_set(&player.anim_sm, IDLE_LEFT_ANIMATION, true, true);
-        }
-        else if(player.direction == RIGHT)
-        {
-            animation_set(&player.anim_sm, IDLE_RIGHT_ANIMATION, true, true);
-        }
-    }
-    
-    player.pos.X = player.aabb.pos.X;
-    player.pos.Y = player.aabb.pos.Y;
-    if (player.pos.Y < level.death_y)
-    {
-        respawn_player();
-    }
-    for (int i = 0; i < num_spikes; i++)
-    {
-        Spike spike = spikes[i];
-
-        b32 collided = aabb_vs_aabb(player.aabb, spike.aabb);
-        if(collided)
+        if (player.light_quantity < 0.01f)
         {
             respawn_player();
         }
-        int dummy = 1;
-    }
-    for (int i = 0; i < num_fireplaces; i++)
-    {
-        Fireplace fireplace = fireplaces[i];
-        b32 collided = aabb_vs_aabb(player.aabb, fireplace.aabb);
-        if(collided)
+    
+        b32 is_moving = false;
+        b32 changed_direction = false;
+
+        if (key_pressed(KEY_Q))
         {
-            player.spawn_pos = fireplace.pos;
+            respawn_player();
+        }
+    
+        if(key_is_down(KEY_LEFT) && key_is_down(KEY_RIGHT))
+        {
+            // DO NOTHING
+        }
+        else if(key_is_down(KEY_LEFT))
+        {
+            if(player.vel.X > 0)
+            {
+                changed_direction = true;
+            }
+            is_moving = true;
+            player.direction = LEFT;
+            player.vel.X -= player.run_accel * dt;
+            animation_set(&player.anim_sm, RUNNING_LEFT_ANIMATION, true, true);
+     
+        }
+        else if(key_is_down(KEY_RIGHT))
+        {
+            if (player.vel.X < 0)
+            {
+                changed_direction = true;
+            }
+            is_moving = true;
+            player.vel.X += player.run_accel * dt;
+            player.direction = RIGHT;
+            animation_set(&player.anim_sm, RUNNING_RIGHT_ANIMATION, true, true);
+        }
+
+        if(key_is_down(KEY_C))
+        {
+            if (player.fat_jump_frames > 0 && player.jump_ready)
+            {
+                player.fat_jump_frames -= 1;
+                player.vel.Y += player.jump_accel * dt;
+            }
+        }
+        else if(player.in_air)
+        {
+            player.jump_ready = false;
+        }
+
+        // natural forces
+        static int safety_frames = 10;
+        if(safety_frames > 0)
+        {
+            safety_frames--;
+        }
+        else
+        {
+            player.vel.Y -= player.gravity * dt;
+        }
+        if (!is_moving || changed_direction)
+        {
+            if (player.in_air)
+            {
+                player.vel.X *= player.horizontal_drag_air;
+            }
+            else
+            {
+                player.vel.X *= player.horizontal_drag_ground;
+            }
+            f32 absX = player.vel.X >= 0 ? player.vel.X : -player.vel.X;
+            if (absX < player.epsilon)
+            {
+                player.vel.X = 0;
+            }
+        }
+
+// apply limitations
+        player.vel.X = HMM_Clamp(-player.max_horizontal_speed, player.vel.X, player.max_horizontal_speed);
+        player.vel.Y = HMM_Clamp(-player.max_vertical_speed, player.vel.Y, player.max_vertical_speed);
+    
+        // set position
+        player.pos += player.vel * dt;
+        hmm_v3 pos = {player.pos.X, player.pos.Y, 0.0f};
+        player.aabb.pos = {player.pos.X, player.pos.Y};
+        b32 did_collide = false;
+        player.in_air = true; // this gets unset in while loop if player bottom collides
+        do
+        {
+            did_collide = false;
+        
+            for(int i = 0; i < level.num_aabbs; ++i)
+            {
+                AABB aabb = level.aabb_list[i];
+                // hmm_v2 quad_pos = world_to_screen(aabb.pos);
+                // hmm_v3 final_pos = {quad_pos.X, quad_pos.Y, 0.0f};
+                // draw_quad(final_pos, aabb.half_dim, {0.0, 0.2, 0.6});
+        
+                AABB intersection;
+                b32 did_intersect = aabb_vs_aabb(player.aabb, aabb, &intersection);
+                if(did_intersect)
+                {
+                    did_collide = true;
+                    int x_dir = (player.aabb.pos.X - intersection.pos.X) > 0 ? 1 : -1;
+                    int y_dir = (player.aabb.pos.Y - intersection.pos.Y) > 0 ? 1 : -1;
+
+                    if(intersection.half_dim.Y <= intersection.half_dim.X)
+                    {
+                        x_dir = 0;
+                        player.vel.Y = 0.0f;
+                    }
+                    else
+                    {
+                        y_dir = 0;
+                        player.vel.X = 0.0f;
+                    }
+
+                    if(y_dir == 1)
+                    {
+                        player.in_air = false;
+                        player.fat_jump_frames = player.max_fat_jump_frames;
+                        player.jump_ready = true;
+                    }
+            
+                    player.aabb.pos.X += (intersection.half_dim.X) * x_dir;
+                    player.aabb.pos.Y += (intersection.half_dim.Y) * y_dir;
+                }
+            }
+        } while(did_collide);
+
+        if(player.in_air)
+        {
+            if(player.direction == LEFT)
+            {
+                animation_set(&player.anim_sm, FALLING_LEFT_ANIMATION, true, true);
+            }
+            else
+            {
+                animation_set(&player.anim_sm, FALLING_RIGHT_ANIMATION, true, true);
+            }
+        }
+
+   
+        player.pos.X = player.aabb.pos.X;
+        player.pos.Y = player.aabb.pos.Y;
+        if (player.pos.Y < level.death_y)
+        {
+            respawn_player();
+        }
+        for (int i = 0; i < num_spikes; i++)
+        {
+            Spike spike = spikes[i];
+
+            b32 collided = aabb_vs_aabb(player.aabb, spike.aabb);
+            if(collided)
+            {
+                player.marked_for_death = true;
+            }
+            int dummy = 1;
+        }
+        b32 hit_a_fireplace = false;
+        for (int i = 0; i < num_fireplaces; i++)
+        {
+            Fireplace fireplace = fireplaces[i];
+            b32 collided = aabb_vs_aabb(player.aabb, fireplace.aabb);
+            if(collided)
+            {
+                hit_a_fireplace = true;
+                player.spawn_pos = fireplace.pos;
+                player.light_quantity = 1.0f;
+                if (!is_moving && !player.in_air)
+                {
+                    if (player.direction == LEFT)
+                    {
+                        animation_set(&player.anim_sm, RECHARGE_LEFT_ANIMATION, true, true);                              
+                    }
+                
+                    if (player.direction == RIGHT)
+                    {
+                        animation_set(&player.anim_sm, RECHARGE_RIGHT_ANIMATION, true, true);                              
+                    }
+                }
+            }
+        }
+        if(!is_moving && !player.in_air && !hit_a_fireplace )
+        {
+            if(player.direction == LEFT)
+            {
+                animation_set(&player.anim_sm, IDLE_LEFT_ANIMATION, true, true);
+            }
+            else if(player.direction == RIGHT)
+            {
+                animation_set(&player.anim_sm, IDLE_RIGHT_ANIMATION, true, true);
+            }
         }
     }
-    pos = world_to_screen({player.pos.X, player.pos.Y, 0.0f});
+    else
+    {
+        player.death_timer -= dt;
+        if(player.death_timer < 0)
+        {
+            respawn_player();
+        }
+        else
+        {
+            if (player.direction == LEFT)
+            {
+            
+                animation_set(&player.anim_sm, DEATH_LEFT_ANIMATION, true, false);
+            }
+            else
+            {
+                animation_set(&player.anim_sm, DEATH_RIGHT_ANIMATION, true, false);
+            }
+        }
+    }
+    hmm_v3 pos = world_to_screen({player.pos.X, player.pos.Y, 0.0f});
     // draw_quad(pos, player.aabb.half_dim, {1.0, 0.0, 0.0});
     draw_animated_quad(pos, player.scale, &player.anim_sm);
     animation_sm_update(&player.anim_sm);
+    int dummy = 0;
 }

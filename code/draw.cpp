@@ -18,6 +18,8 @@ enum Textures
 enum Animations
 {
     FIREPLACE_ANIMATION,
+    DEATH_RIGHT_ANIMATION,
+    DEATH_LEFT_ANIMATION,
     RECHARGE_RIGHT_ANIMATION,
     RECHARGE_LEFT_ANIMATION,
     FALLING_RIGHT_ANIMATION,
@@ -105,14 +107,16 @@ void draw_init()
     init_texture("0.png", TEST_TEXTURE2);
 
     // ANIMATIONS
-    init_animation("player.png", RECHARGE_RIGHT_ANIMATION, 0, 15, {32.0f, 32.0f}, 2.0f);
-    init_animation("player.png", RECHARGE_LEFT_ANIMATION, 16, 31, {32.0f, 32.0f}, 2.0f);
-    init_animation("player.png", FALLING_RIGHT_ANIMATION, 32, 36, {32.0f, 32.0f}, 0.7f);
-    init_animation("player.png", FALLING_LEFT_ANIMATION, 48, 52, {32.0f, 32.0f}, 0.7f);
-    init_animation("player.png", RUNNING_RIGHT_ANIMATION, 64, 71, {32.0f, 32.0f}, 0.7f);
-    init_animation("player.png", RUNNING_LEFT_ANIMATION, 80, 87, {32.0f, 32.0f}, 0.7f);
-    init_animation("player.png", IDLE_RIGHT_ANIMATION, 96, 99, {32.0f, 32.0f}, 0.7f);
-    init_animation("player.png", IDLE_LEFT_ANIMATION, 112, 116, {32.0f, 32.0f}, 0.7f);
+    init_animation("player2.png", RECHARGE_RIGHT_ANIMATION, 0, 15, {32.0f, 32.0f}, 2.0f);
+    init_animation("player2.png", RECHARGE_LEFT_ANIMATION, 16, 31, {32.0f, 32.0f}, 2.0f);
+    init_animation("player2.png", FALLING_RIGHT_ANIMATION, 32, 36, {32.0f, 32.0f}, 0.7f);
+    init_animation("player2.png", FALLING_LEFT_ANIMATION, 48, 52, {32.0f, 32.0f}, 0.7f);
+    init_animation("player2.png", RUNNING_RIGHT_ANIMATION, 64, 71, {32.0f, 32.0f}, 0.7f);
+    init_animation("player2.png", RUNNING_LEFT_ANIMATION, 80, 87, {32.0f, 32.0f}, 0.7f);
+    init_animation("player2.png", IDLE_RIGHT_ANIMATION, 96, 99, {32.0f, 32.0f}, 0.7f);
+    init_animation("player2.png", IDLE_LEFT_ANIMATION, 112, 116, {32.0f, 32.0f}, 0.7f);
+    init_animation("player2.png", DEATH_RIGHT_ANIMATION, 100, 105, {32.0f, 32.0f}, 1.0f);
+    init_animation("player2.png", DEATH_LEFT_ANIMATION, 117, 122, {32.0f, 32.0f}, 1.0f);
     init_animation("campfire.png", FIREPLACE_ANIMATION, 0, 7, {32.0f, 32.0f}, 1.0f);
     
     // FONTS
