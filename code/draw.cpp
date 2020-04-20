@@ -3,6 +3,7 @@ enum Shaders
     QUAD_SHADER,
     TEX_QUAD_SHADER,
     ANIM_QUAD_SHADER,
+    TILE_QUAD_SHADER,
     TEXT_SHADER,
     LAST_SHADER
 };
@@ -92,6 +93,7 @@ void draw_init()
     init_shader("quad", QUAD_SHADER);
     init_shader("tex_quad", TEX_QUAD_SHADER);
     init_shader("anim_quad", ANIM_QUAD_SHADER);
+    init_shader("tile_quad", TILE_QUAD_SHADER);
 	init_shader("text", TEXT_SHADER);
     
     // TEXTURES
@@ -234,7 +236,7 @@ internal void draw_textured_quad(hmm_v3 pos, int scale, Texture texture)
 }
 
 // TILEMAPPED QUADS
-internal void draw_tilemapped_quad(hmm_v3 pos, int scale, int tile_index)
+internal void draw_tilemapped_quad(hmm_v3 pos, int scale, int tile_index, hmm_v2 light_pos, float light_quantity)
 {
     if (!on_screen(pos, scale, true))
     {
@@ -254,23 +256,28 @@ internal void draw_tilemapped_quad(hmm_v3 pos, int scale, int tile_index)
      i32 cols = texture->cols;
      f32 grid_x = (f32)(tile_index % cols);
      f32 grid_y = (f32)(tile_index / cols);
-     shader_set(shader_cache[ANIM_QUAD_SHADER]);
+     shader_set(shader_cache[TILE_QUAD_SHADER]);
      pos.X += (game_window.base_width / 2);
      pos.Y += (game_window.base_height / 2);
-
+     light_pos = world_to_screen(light_pos);
+     light_pos.X += (game_window.base_width / 2);
+     light_pos.Y += (game_window.base_height / 2);
+     
      hmm_v2 half_size = {(f32)(scale * texture->grid_width / 2),
                          (f32)(scale * texture->grid_height / 2)};
      hmm_vec2 uv_offset = {(f32)(grid_x * texture->grid_width / texture->width),
                            (f32)(grid_y * texture->grid_height / texture->height)};
      hmm_vec2 atlas_dim = {(f32)cols, (f32)rows};
         
-     uniform_set_vec3(shader_cache[ANIM_QUAD_SHADER], "quad_pos", pos);
-     uniform_set_vec2(shader_cache[ANIM_QUAD_SHADER], "quad_half_size", half_size);
-     uniform_set_mat4(shader_cache[ANIM_QUAD_SHADER], "projection_matrix",
+     uniform_set_vec3(shader_cache[TILE_QUAD_SHADER], "quad_pos", pos);
+     uniform_set_vec2(shader_cache[TILE_QUAD_SHADER], "quad_half_size", half_size);
+     uniform_set_mat4(shader_cache[TILE_QUAD_SHADER], "projection_matrix",
                       projection_matrix);
-     uniform_set_vec2(shader_cache[ANIM_QUAD_SHADER], "uv_offset", uv_offset);
-     uniform_set_vec2(shader_cache[ANIM_QUAD_SHADER], "atlas_dim", atlas_dim);
-        
+     uniform_set_vec2(shader_cache[TILE_QUAD_SHADER], "uv_offset", uv_offset);
+     uniform_set_vec2(shader_cache[TILE_QUAD_SHADER], "atlas_dim", atlas_dim);
+     uniform_set_vec2(shader_cache[TILE_QUAD_SHADER], "light_pos", light_pos);
+     uniform_set_float(shader_cache[TILE_QUAD_SHADER], "light_quantity", light_quantity);
+     
      texture_set(GL_TEXTURE0, *texture);    
      glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
        

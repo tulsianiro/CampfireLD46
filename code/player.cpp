@@ -29,6 +29,8 @@ struct Player
     f32 jump_accel = 50000.0f;
     f32 max_horizontal_speed = 400.0f;
     f32 max_vertical_speed = 200.0f;
+
+    f32 light_quantity = 1.0f;
 };
 
 global Player player;
@@ -56,6 +58,9 @@ init_player(hmm_v2 pos)
 internal void
 player_update_and_render()
 {
+    player.light_quantity -= 0.05 * dt;
+    player.light_quantity = player.light_quantity < 0 ? 0 : player.light_quantity;
+    
     b32 is_moving = false;
     b32 changed_direction = false;
     
