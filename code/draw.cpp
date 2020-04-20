@@ -49,13 +49,17 @@ struct Camera
 {
     int x;
     int y;
+    int player_offset_x;
+    int player_offset_y;
 };
 global Camera camera;
 
-internal void init_camera(int x, int y)
+internal void init_camera(int x, int y, int player_offset_x, int player_offset_y)
 {
     camera.x = x;
     camera.y = y;
+    camera.player_offset_x = player_offset_x;
+    camera.player_offset_y = player_offset_y;
     //TODO(jun): think about real camera initialization
 }
 

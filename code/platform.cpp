@@ -172,8 +172,15 @@ int main()
 
     glfwSwapInterval(1);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+    // initialize game stuff
     draw_init();
     audio_init();
+    play_sound(TEST_AUDIO);
+    change_volume(TEST_AUDIO, 0.1f);
+    player = init_player({0.0f, 0.0f});
+    init_camera(0, 0, 0, 100);
+    init_level();
     
     while(!glfwWindowShouldClose(game_window.window))
     {
