@@ -41,7 +41,7 @@ void init_level()
     level.level[level.max_row++] = "..............QQQQQ.....................";
     level.level[level.max_row++] = ".......vwx...DEEEEEF....................";
     level.level[level.max_row++] = ".......lmn..............................";
-    level.level[level.max_row++] = ".......bcd....!.........................";
+    level.level[level.max_row++] = ".......bcd.............!................";
     level.level[level.max_row++] = "..NOP..XYZ..............................";
     level.level[level.max_row++] = "DEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEF.";
     level.level[level.max_row++] = ":;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;<.";
