@@ -31,6 +31,7 @@ struct Player
     f32 max_horizontal_speed = 300.0f;
     f32 max_vertical_speed = 800.0f;
     b32 jump_ready = false;
+    f32 light_quantity = 1.0f;
 };
 
 global Player player;
@@ -71,6 +72,9 @@ internal void respawn_player()
 internal void
 player_update_and_render()
 {
+    player.light_quantity -= 0.05 * dt;
+    player.light_quantity = player.light_quantity < 0 ? 0 : player.light_quantity;
+    
     b32 is_moving = false;
     b32 changed_direction = false;
 

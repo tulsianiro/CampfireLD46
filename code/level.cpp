@@ -149,7 +149,7 @@ internal void level_update_and_render()
                 f32 world_y = y * 16.0f * level.tilescale - level.world_offset.Y;
                 hmm_v3 pos = {world_x, world_y, 0.0f};
                 pos = world_to_screen(pos);
-                draw_tilemapped_quad(pos, level.tilescale, level.tiles[y][x].index);
+                draw_tilemapped_quad(pos, level.tilescale, level.tiles[y][x].index, player.pos, player.light_quantity);
             }
         }
     }
