@@ -11,10 +11,12 @@ struct Tile
     AABB aabb;
 };
 
+#define MAX_AABBS 512
 struct Level
 {
     char *level[MAX_ROWS];
-
+    AABB aabb_list[MAX_AABBS];
+    int num_aabbs;
     // 0, 0 is top left
     // max_col, max_row is bottom-right
     u32 max_col;

@@ -78,27 +78,60 @@ player_update_and_render()
         }
     }
 
-    hmm_v3 pos = {player.pos.X, player.pos.Y, 0.0f};
-    player.aabb.pos = {player.pos.X, player.pos.Y};
-    int player_grid_x = (player.pos.X + level.world_offset.X) / (tilemap.grid_width * level.tilescale);
-    int player_grid_y = (player.pos.Y + level.world_offset.Y) / (tilemap.grid_height * level.tilescale);
+    f32 gravity = 10.0f;
+    player.pos.Y -= gravity;
+    // int player_grid_x = (player.pos.X + level.world_offset.X) / (tilemap.grid_width * level.tilescale);
+    // int player_grid_y = (player.pos.Y + level.world_offset.Y) / (tilemap.grid_height * level.tilescale);
     // hmm_v2 tile_pos = level.tiles[player_grid_y][player_grid_x].aabb.pos;
     // hmm_v2 tile_half_boi = level.tiles[player_grid_y][player_grid_x].aabb.half_dim;
-    // check your own tile
-    if(aabb_vs_aabb(player.aabb, level.tiles[player_grid_y][player_grid_x].aabb))
-    {
-        
-    }
 
-    if(aabb_vs_aabb(player.aabb, level.tiles[player_grid_y][player_grid_x].aabb))
-    {
-     
-    }
+    hmm_v3 pos = {player.pos.X, player.pos.Y, 0.0f};
+    player.aabb.pos = {player.pos.X, player.pos.Y};
+
+    b32 did_collide = false;
     
-    pos = world_to_screen(pos);
-    // tile_pos = world_to_screen(tile_pos);
+    do
+    {
+        did_collide = false;
+        
+        for(int i = 0; i < level.num_aabbs; ++i)
+        {
+            AABB aabb = level.aabb_list[i];
+            // hmm_v2 quad_pos = world_to_screen(aabb.pos);
+            // hmm_v3 final_pos = {quad_pos.X, quad_pos.Y, 0.0f};
+            // draw_quad(final_pos, aabb.half_dim, {0.0, 0.2, 0.6});
+        
+            AABB intersection;
+            b32 did_intersect = aabb_vs_aabb(player.aabb, aabb, &intersection);
+            if(did_intersect)
+            {
+                did_collide = true;
+                int x_dir = (player.aabb.pos.X - intersection.pos.X) > 0 ? 1 : -1;
+                int y_dir = (player.aabb.pos.Y - intersection.pos.Y) > 0 ? 1 : -1;
+                if(intersection.half_dim.Y <= intersection.half_dim.X)
+                {
+                    x_dir = 0;
+                }
+                else
+                {
+                    y_dir = 0;
+                }
+            
+                player.aabb.pos.X += (intersection.half_dim.X) * x_dir;
+                player.aabb.pos.Y += (intersection.half_dim.Y) * y_dir;
+            }
+        }
+    } while(did_collide);
+    
+    player.pos.X = player.aabb.pos.X;
+    player.pos.Y = player.aabb.pos.Y;
+    pos = world_to_screen({player.pos.X, player.pos.Y, 0.0f});
     draw_quad(pos, player.aabb.half_dim, {1.0, 0.0, 0.0});
-    // draw_quad({tile_pos.X, tile_pos.Y, 0.0f}, tile_half_boi, {0.0, 1.0, 0.0});
     draw_animated_quad(pos, player.scale, &player.anim_sm);
     animation_sm_update(&player.anim_sm);
+
+    // draw_quad({tile_pos.X, tile_pos.Y, 0.0f}, tile_half_boi, {0.0, 1.0, 0.0});
+    // tile_pos = world_to_screen(tile_pos);
+    // intersection_aabb.pos = world_to_screen(intersection_aabb.pos);
+    // draw_quad({intersection_aabb.pos.X, intersection_aabb.pos.Y, 0.0f}, intersection_aabb.half_dim, {1.0, 0.4, 0.7});
 }

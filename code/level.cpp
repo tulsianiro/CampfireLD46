@@ -1,5 +1,13 @@
 const char *level_file = "../res/levels/level.txt";    
 
+struct AABB_Specifier
+{
+    u32 x0;
+    u32 x1;
+    u32 y0;
+    u32 y1;
+};
+
 void init_level()
 {
     for (int i = 0; i < MAX_COLS; i++)
@@ -9,54 +17,70 @@ void init_level()
             level.tiles[i][j].index = -1;
         }
     }
+
     level.world_offset = {game_window.base_width / 2.0f, game_window.base_height / 2.0f};
     level.tilescale = 2;
     
-    level.level[0]  = "........................................";
-    level.level[1]  = "........................................";
-    level.level[2]  = "........................................";
-    level.level[3]  = "........................................";
-    level.level[4]  = "........................................";
-    level.level[5]  = "........................................";
-    level.level[6]  = "........................................";
-    level.level[7]  = "........................................";
-    level.level[8]  = "........................................";
-    level.level[9]  = "........................................";
-    level.level[10] = "........................................";
-    level.level[11] = "........................................";
-    level.level[12] = "........................................";
-    level.level[13] = "........................................";
-    level.level[14] = "........................................";
-    level.level[15] = "........................................";
-    level.level[16] = "..............QQQQQ.....................";
-    level.level[17] = ".......vwx...DEEEEEF....................";
-    level.level[18] = ".......lmn..............................";
-    level.level[19] = ".......bcd....!.........................";
-    level.level[20] = "..NOP..XYZ..............................";
-    level.level[21] = "DEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEF.";
-    level.level[22] = ":;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;<.";
-    level.level[23] = "011111111111111111111111111111111111112.";
-    level.level[24] = "........................................";
+    level.max_row = 0;
+    level.level[level.max_row++] = "........................................";
+    level.level[level.max_row++] = "........................................";
+    level.level[level.max_row++] = "........................................";
+    level.level[level.max_row++] = "........................................";
+    level.level[level.max_row++] = "........................................";
+    level.level[level.max_row++] = "........................................";
+    level.level[level.max_row++] = "........................................";
+    level.level[level.max_row++] = "........................................";
+    level.level[level.max_row++] = "........................................";
+    level.level[level.max_row++] = "........................................";
+    level.level[level.max_row++] = "........................................";
+    level.level[level.max_row++] = "........................................";
+    level.level[level.max_row++] = "........................................";
+    level.level[level.max_row++] = "........................................";
+    level.level[level.max_row++] = "........................................";
+    level.level[level.max_row++] = "........................................";
+    level.level[level.max_row++] = "..............QQQQQ.....................";
+    level.level[level.max_row++] = ".......vwx...DEEEEEF....................";
+    level.level[level.max_row++] = ".......lmn..............................";
+    level.level[level.max_row++] = ".......bcd....!.........................";
+    level.level[level.max_row++] = "..NOP..XYZ..............................";
+    level.level[level.max_row++] = "DEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEF.";
+    level.level[level.max_row++] = ":;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;<.";
+    level.level[level.max_row++] = "011111111111111111111111111111111111112.";
+    level.level[level.max_row++] = "........................................";
 
+    AABB_Specifier aabb_specifiers[] =
+    {
+        {0, 39, 1, 4},
+        {13, 20, 7, 8},
+    };
+    level.num_aabbs = sizeof(aabb_specifiers) / sizeof(AABB_Specifier);
+
+    level.max_row--;
     char *curr_char = level.level[0];
     int count = -1;
-    while(*curr_char != '\0')
+    while(*curr_char != '\0') {count++; curr_char++;}
+    level.max_col = count;
+
+    for(int i = 0; i < level.num_aabbs; ++i)
     {
-        count++;
-        curr_char++;
+        AABB_Specifier aabb_spec = aabb_specifiers[i];
+        f32 x0_world = aabb_spec.x0 * tilemap.grid_width * level.tilescale - level.world_offset.X -  (tilemap.grid_width * level.tilescale / 2.0f);
+        f32 x1_world =  aabb_spec.x1 * tilemap.grid_width * level.tilescale - level.world_offset.X - (tilemap.grid_width * level.tilescale / 2.0f);
+        f32 y0_world = aabb_spec.y0 * tilemap.grid_height * level.tilescale - level.world_offset.Y - (tilemap.grid_height * level.tilescale / 2.0f);
+        f32 y1_world = aabb_spec.y1 * tilemap.grid_height * level.tilescale - level.world_offset.Y - (tilemap.grid_height * level.tilescale / 2.0f);
+        hmm_v2 half_dim = {(x1_world - x0_world) / 2.0f, (y1_world - y0_world) / 2.0f};
+        hmm_v2 pos = {x0_world + half_dim.X, y0_world + half_dim.Y};
+        AABB tempAABB = {pos, half_dim};
+        level.aabb_list[i] = tempAABB;
     }
     
-    level.max_col = count;
-    level.max_row = 24;
-
     for(int y = 0; y < level.max_row; ++y)
     {
         for(int x = 0; x < level.max_col; ++x)
         {
             char c = level.level[level.max_row - y][x];
             f32 world_x = x * 16.0f * level.tilescale - level.world_offset.X;
-            f32 world_y = y * 16.0f * level.tilescale - level.world_offset.Y;
-            
+            f32 world_y = y * 16.0f * level.tilescale - level.world_offset.Y;        
             switch(c)
             {
                 case '.':
@@ -94,9 +118,6 @@ internal void level_update_and_render()
                 hmm_v3 pos = {world_x, world_y, 0.0f};
                 pos = world_to_screen(pos);
                 draw_tilemapped_quad(pos, level.tilescale, level.tiles[y][x].index);
-                hmm_v2 quad_pos = world_to_screen(level.tiles[y][x].aabb.pos);
-                hmm_v3 final_pos = {quad_pos.X, quad_pos.Y, 0.0f};
-                draw_quad(final_pos, level.tiles[y][x].aabb.half_dim, {0.0, 1.0, 1.0});
             }
         }
     }
