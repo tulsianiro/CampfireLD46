@@ -81,11 +81,19 @@ internal void respawn_player()
 internal void
 player_update_and_render()
 {
+    static b32 won = false;
+    if (player.pos.X > 1300.0f || won)
+    {
+        RenderText(&font_cache[DEFAULT_FONT], {1, 0, 0, 1}, {0.48f, 0.3f}, "you win!");
+        won = true;
+    }
     if (!player.marked_for_death)
     {
-        player.light_quantity -= 0.05 * dt;
-        player.light_quantity = player.light_quantity < 0 ? 0 : player.light_quantity;
-
+        if (!won)
+        {
+            player.light_quantity -= 0.07f * dt;
+            player.light_quantity = player.light_quantity < 0 ? 0 : player.light_quantity;
+        }
         if (player.light_quantity < 0.01f)
         {
             respawn_player();
