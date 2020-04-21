@@ -147,7 +147,7 @@ void init_level()
                     spike.pos.Y = y * 32.0f - level.world_offset.Y;
                     AABB aabb;
                     aabb.pos = spike.pos;
-                    aabb.half_dim = {13.0f, 13.0f};
+                    aabb.half_dim = {11.0f, 11.0f};
                     spike.aabb = aabb;
                     spikes[num_spikes++] = spike;
                 } break;
@@ -176,8 +176,11 @@ internal void level_update_and_render()
                 f32 world_x = x * 16.0f * level.tilescale - level.world_offset.X;
                 f32 world_y = y * 16.0f * level.tilescale - level.world_offset.Y;
                 hmm_v3 pos = {world_x, world_y, 0.0f};
-                pos = world_to_screen(pos);
-                draw_tilemapped_quad(pos, level.tilescale, level.tiles[y][x].index, player.pos, player.light_quantity);
+                if(pos.X >= -320 && pos.X <= 1690 && pos.Y >= -180 && pos.Y <= 620)
+                {
+                    pos = world_to_screen(pos);
+                    draw_tilemapped_quad(pos, level.tilescale, level.tiles[y][x].index, player.pos, player.light_quantity);
+                }
             }
         }
     }

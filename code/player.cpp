@@ -82,10 +82,11 @@ internal void
 player_update_and_render()
 {
     static b32 won = false;
-    if (player.pos.X > 1300.0f || won)
+    if (player.pos.X > 1300.0f && player.pos.Y > 200 || won)
     {
         RenderText(&font_cache[DEFAULT_FONT], {1, 0, 0, 1}, {0.48f, 0.3f}, "you win!");
         won = true;
+        player.light_quantity = 400.0f;
     }
     if (!player.marked_for_death)
     {
@@ -268,6 +269,10 @@ player_update_and_render()
                 hit_a_fireplace = true;
                 player.spawn_pos = fireplace.pos;
                 player.light_quantity = 1.0f;
+                if(won)
+                {
+                    player.light_quantity = 400.0f;
+                }
                 if (!is_moving && !player.in_air)
                 {
                     if (player.direction == LEFT)
